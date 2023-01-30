@@ -33,7 +33,7 @@
 
 <script>
 import axios from "axios";
-import sha256 from "crypto-js/sha256";
+import CryptoJS from 'crypto-js'
 
 export default {
   name: "UploadImages",
@@ -58,9 +58,15 @@ export default {
       type: String,
       default: "image/jpeg,image/png",
     },
-    uploadUrl: {
-      type: String,
-      default: "",
+    handleUpload: {
+      type: Function,
+      default: function(data) {
+        return axios({
+          method: "post",
+          url: "./api/v1/file/upload/generate",
+          data: data,
+        });
+      },
     },
   },
   data() {
@@ -71,6 +77,7 @@ export default {
       Data: {},
       fileList: [],
       hideUploadBtn: false,
+      fileUploadGenerate: this.handleUpload(),
     };
   },
   watch: {
@@ -104,7 +111,6 @@ export default {
       immediate: true,
     },
   },
-
   methods: {
     // 上传图片前
     beforeAvatarUpload(file) {
@@ -116,21 +122,49 @@ export default {
       }
       return true;
     },
+    sha256File(file) {
+      return new Promise(function(resolve) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const data = event.target.result;
+          const encrypted = CryptoJS.SHA256(data);
+          resolve(CryptoJS.enc.Hex.stringify(encrypted));
+        };
+        reader.readAsBinaryString(file);
+      });
+    },
     async getFilterData(file) {
       try {
-        const fileName = file.name.substring(0, file.name.lastIndexOf("."));
+        const fileName = await this.sha256File(file);
         const extension = file.name.substring(file.name.lastIndexOf("."));
-        const combineName = sha256(fileName).toString() + extension;
-        console.log("combineName", combineName);
+        const combineName = fileName + extension;
         const param = {
           name: combineName,
         };
-        const res = await axios({
-          method: "post",
-          url: this.uploadUrl,
-          data: param,
-        });
-        return res
+
+        const initRes = await this.fileUploadGenerate(param);
+        if (initRes.success) {
+          const secondRes = await axios.request({
+            method: "PUT",
+            url: initRes.data.uploadUrl,
+            withCredentials: false,
+            headers: initRes.headers,
+            validateStatus: function(status) {
+              return status >= 200;
+            },
+            maxRedirects: 0,
+            responseType: "text",
+            data: file,
+          });
+          console.log("secondRes", secondRes);
+          if (secondRes.status < 300) {
+            return initRes;
+          } else {
+            throw Error(secondRes);
+          }
+        } else {
+          throw Error(initRes);
+        }
       } catch (e) {
         console.log(e);
         throw e;
@@ -140,12 +174,11 @@ export default {
     httpRequest(File) {
       this.getFilterData(File.file)
         .then((res) => {
-          console.log("res", res);
           if (res.success) {
             this.Data = res.data;
             // 主要是要其中的url
             const obj = {
-              url: this.Data.url,
+              url: this.Data.fileUrl,
             };
 
             this.banner_list.push(obj);
@@ -206,6 +239,7 @@ export default {
     display: none !important;
   }
 }
+
 .el-upload-list__item {
   transition: none !important;
 }

@@ -154,6 +154,8 @@
           <el-switch
             v-model="sonSearchData[item.prop]"
             :size="itemSize ? itemSize : item.size"
+            :active-value="item.activeValue"
+            :inactive-value="item.inactiveValue"
             @change="item.change && item.change(sonSearchData[item.prop])"
           ></el-switch>
         </div>

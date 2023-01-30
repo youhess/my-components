@@ -15,7 +15,6 @@
         >
           <!-- 自定义item slot -->
           <template v-if="item.type === 'Slot' || item.type === 'slot'">
-
             <div>
               <slot
                 :name="item.name"
@@ -36,7 +35,11 @@
                 clearable
                 :maxlength="item.maxlength"
                 :show-word-limit="item.showWordLimit"
-                :disabled="item.disabled"
+                :disabled="
+                  (item.handledisabled &&
+                    item.handledisabled(customForm[item.prop])) ||
+                    item.disabled
+                "
                 :size="size"
                 :placeholder="`请输入${item.name}`"
                 @change="item.change && item.change(customForm[item.prop])"
@@ -52,7 +55,13 @@
                 :precision="item.precision"
                 :max="item.max"
                 :controls-position="item.controlsPosition"
+                :controls="item.controls"
                 :style="{ width: item.width ? item.width : '100%' }"
+                :disabled="
+                  (item.handledisabled &&
+                    item.handledisabled(customForm[item.prop])) ||
+                    item.disabled
+                "
                 @change="item.change && item.change(customForm[item.prop])"
               />
               <!-- 下拉 -->
@@ -67,7 +76,11 @@
                 :filterable="item.filterable"
                 :reserve-keyword="item.reserveKeyword"
                 :loading="item.loading"
-                :disabled="item.disabled"
+                :disabled="
+                  (item.handledisabled &&
+                    item.handledisabled(customForm[item.prop])) ||
+                    item.disabled
+                "
                 :remote="item.remote"
                 :remote-method="item.remoteMethod"
                 :placeholder="`请输入${item.name}`"
@@ -88,7 +101,11 @@
                 :style="{ width: item.width ? item.width : '100%' }"
                 :size="size"
                 type="textarea"
-                :disabled="item.disabled"
+                :disabled="
+                  (item.handledisabled &&
+                    item.handledisabled(customForm[item.prop])) ||
+                    item.disabled
+                "
                 :autosize="item.autosize"
                 :rows="item.rows"
                 :maxlength="item.maxlength"
@@ -102,8 +119,12 @@
                 v-if="item.type === 'image' || item.type == 'Image'"
                 v-model="customForm[item.prop]"
                 :limit="item.limit"
-                :disabled="item.disabled"
-                :upload-url="uploadUrl"
+                :disabled="
+                  (item.handledisabled &&
+                    item.handledisabled(customForm[item.prop])) ||
+                    item.disabled
+                "
+                :handle-upload="handleUpload"
               />
               <!-- 日期时间 -->
               <el-date-picker
@@ -120,7 +141,11 @@
                 :end-placeholder="`截止${item.name}`"
                 :placeholder="`选择${item.name}`"
                 :size="size"
-                :disabled="item.disabled"
+                :disabled="
+                  (item.handledisabled &&
+                    item.handledisabled(customForm[item.prop])) ||
+                    item.disabled
+                "
                 :range-separator="
                   item.rangeSeparator ? item.rangeSeparator : '~'
                 "
@@ -143,7 +168,11 @@
                 :end-placeholder="`截止${item.name}`"
                 :placeholder="`请选择${item.name}`"
                 :size="size"
-                :disabled="item.disabled"
+                :disabled="
+                  (item.handledisabled &&
+                    item.handledisabled(customForm[item.prop])) ||
+                    item.disabled
+                "
                 :range-separator="
                   item.rangeSeparator ? item.rangeSeparator : '~'
                 "
@@ -160,7 +189,11 @@
                 v-model="customForm[item.prop]"
                 :size="item.size"
                 :style="{ width: item.width ? item.width : '100%' }"
-                :disabled="item.disabled"
+                :disabled="
+                  (item.handledisabled &&
+                    item.handledisabled(customForm[item.prop])) ||
+                    item.disabled
+                "
                 @input="item.input && item.input(customForm[item.prop])"
               >
                 <div
@@ -178,9 +211,29 @@
               <el-switch
                 v-if="item.type === 'switch' || item.type === 'Switch'"
                 v-model="customForm[item.prop]"
-                :disabled="item.disabled"
+                :disabled="
+                  (item.handledisabled &&
+                    item.handledisabled(customForm[item.prop])) ||
+                    item.disabled
+                "
                 :active-value="item.activeValue"
                 :inactive-value="item.inactiveValue"
+                @change="item.change && item.change(customForm[item.prop])"
+              />
+              <!-- selectTree -->
+              <select-tree
+                v-if="item.type === 'selectTree' || item.type == 'SelectTree'"
+                v-model="customForm[item.prop]"
+                :placeholder="`请选择${item.name}`"
+                :tree-props="item.treeProps"
+                :data="item.data"
+                :disabled="
+                  (item.handledisabled &&
+                    item.handledisabled(customForm[item.prop])) ||
+                    item.disabled
+                "
+                :node-key="item.nodeKey"
+                :custom-id="item.customId"
                 @change="item.change && item.change(customForm[item.prop])"
               />
               <!-- tip 提示语  -->
@@ -209,7 +262,9 @@
           v-if="item.isShow ? item.isShow() : true"
           :type="item.type"
           :size="item.size || size"
-          :disabled="item.disabled"
+          :disabled="
+            (item.handledisabled && item.handledisabled()) || item.disabled
+          "
           @click="item.handle()"
         >{{ item.label }}</el-button>
       </span>
@@ -218,6 +273,7 @@
 </template>
 <script>
 import UploadImages from "./components/UploadImages";
+import SelectTree from "./components/SelectTree";
 export default {
   name: "BluexiiCustomForm",
   directives: {
@@ -238,6 +294,7 @@ export default {
   },
   components: {
     UploadImages,
+    SelectTree,
   },
   props: {
     formConfig: {
@@ -264,9 +321,8 @@ export default {
       type: Array,
       default: () => [],
     },
-    uploadUrl: {
-      type: String,
-      default: "",
+    handleUpload: {
+      type: Function,
     },
   },
   data() {
@@ -341,7 +397,6 @@ export default {
     },
     customForm: {
       handler(newVal) {
-        console.log("customForm监听", newVal);
         this.$emit("update:formData", newVal);
       },
       deep: true,
