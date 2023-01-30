@@ -431,7 +431,7 @@
                   v-model.number="scope.row[item.prop]"
                   v-focus
                   size="mini"
-                  @blur="inputBlur(scope.row[item.prop])"
+                  @blur="inputBlur(scope.row)"
                 />
               </div>
               <div
@@ -594,7 +594,6 @@ export default {
     return {
       dbClickRowIndex: null, // 当前点击的行索引
       dbClickCellIndex: null, // 当前点击的列索引
-      tabClickLabel: "", // 当前点击的列名
       // label 必须唯一 唯一值
       filterColumnItems: this.filterColumnItemArr,
       defaultTableCols: this.tableCols, // defaultTableCols
@@ -650,21 +649,15 @@ export default {
     // 控制input显示 row 当前行 column 当前列
     // props: row, column, cell, event
     tabClick(row, column) {
-      // console.log("column:", column);
-      // console.log("column.index:", column.index);
-      // console.log("column.label:", column.label);
       this.dbClickRowIndex = row.index;
       this.dbClickCellIndex = column.index;
-      this.tabClickLabel = column.label;
     },
     // 失去焦点初始化
-    inputBlur() {
-      // console.log("this.tableData:", this.tableData[this.dbClickRowIndex]);
+    inputBlur(row) {
       // TODO 向外抛出 失焦行信息
-      this.$emit("inputBlur", this.tableData[this.dbClickRowIndex]);
+      this.$emit("inputBlur", row);
       this.dbClickRowIndex = null;
       this.dbClickCellIndex = null;
-      this.tabClickLabel = "";
     },
     // 把每一行的索引放进row
     tableRowClassName({ row, rowIndex }) {
@@ -700,6 +693,9 @@ export default {
     },
     clearSelection() {
       this.$refs.cesTable.clearSelection();
+    },
+    toggleRowSelection(res) {
+      this.$refs.cesTable.toggleRowSelection(res.row, res.isSelected);
     },
     // tableRowClassName({rowIndex}) {
     //     if (rowIndex % 2 === 0) {
