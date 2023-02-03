@@ -6,10 +6,7 @@
       class="handle-wrapper"
     >
       <template>
-        <span
-          v-for="(item, index) in tableHandles"
-          :key="index"
-        >
+        <span v-for="(item, index) in tableHandles" :key="index">
           <el-button
             v-if="item.isShown ? item.isShown() : true"
             :size="item.size || size"
@@ -24,29 +21,23 @@
             :class="(item.handleclass && item.handleclass()) || item.class"
             :disabled="item.isDisabled && item.isDisabled()"
             @click="item.handle()"
-          >{{ item.label }}
+            >{{ item.label }}
           </el-button>
         </span>
       </template>
     </section>
     <!-- 数据表格 -->
     <section class="ces-table">
-      <div
-        v-if="isFilterColumn"
-        class="filter-column"
-      >
-        <el-popover
-          placement="bottom"
-          width="150"
-          trigger="click"
-        >
+      <div v-if="isFilterColumn" class="filter-column">
+        <el-popover placement="bottom" width="150" trigger="click">
           <el-checkbox-group v-model="filterColumnItems">
             <el-checkbox
               v-for="(item, index) in tableCols"
               :key="index"
               :label="item.label"
               :disabled="filterColumnDisabledArr.includes(item.label)"
-            >{{ item.label }}</el-checkbox>
+              >{{ item.label }}</el-checkbox
+            >
           </el-checkbox-group>
 
           <div slot="reference">
@@ -85,7 +76,7 @@
           <img
             style="width: 230px; height: 150px; margin: 50px auto"
             :src="'https://bluexiidev.obs.cn-east-3.myhuaweicloud.com:443/huawei/center/ad8fbd69e03f7e279ff4e0ce20f992432917d6725492a1a4ef2f157a348e1216.png'"
-          >
+          />
         </span>
         <!-- 选择项 -->
         <el-table-column
@@ -122,10 +113,7 @@
           :render-header="item.require ? renderHeader : null"
         >
           <!-- 自定表头 -->
-          <template
-            v-if="item.isHeaderOptions"
-            slot="header"
-          >
+          <template v-if="item.isHeaderOptions" slot="header">
             <div style="display: flex; align-items: center; gap: 6px">
               <div class="left-header-wrapper">
                 <!-- 启用 tooltip-->
@@ -153,10 +141,7 @@
           </template>
           <template slot-scope="scope">
             <!-- html -->
-            <span
-              v-if="item.type === 'Html'"
-              v-html="item.html(scope.row)"
-            />
+            <span v-if="item.type === 'Html'" v-html="item.html(scope.row)" />
             <!-- 按钮 -->
             <span v-if="item.type === 'Button'">
               <template>
@@ -182,16 +167,16 @@
                     style="margin-right: 10px"
                     :style="
                       (btn.handlestyle && btn.handlestyle(scope.row)) ||
-                        btn.style
+                      btn.style
                     "
                     :class="
                       (btn.handleclass && btn.handleclass(scope.row)) ||
-                        btn.class
+                      btn.class
                     "
                     @click="btn.handle(scope.row)"
-                  >{{
-                    (btn.formatter && btn.formatter(scope.row)) || btn.label
-                  }}
+                    >{{
+                      (btn.formatter && btn.formatter(scope.row)) || btn.label
+                    }}
                   </el-button>
                 </span>
                 <el-dropdown
@@ -210,24 +195,24 @@
                     :loading="item.collapseButton['loading']"
                     :disabled="
                       item.collapseButton['isDisabled'] &&
-                        item.collapseButton['isDisabled'](scope.row)
+                      item.collapseButton['isDisabled'](scope.row)
                     "
                     style="margin-right: 10px"
                     :style="
                       (item.collapseButton['handlestyle'] &&
                         item.collapseButton['handlestyle'](scope.row)) ||
-                        item.collapseButton['style']
+                      item.collapseButton['style']
                     "
                     :class="
                       (item.collapseButton['handleclass'] &&
                         item.collapseButton['handleclass'](scope.row)) ||
-                        item.collapseButton['class']
+                      item.collapseButton['class']
                     "
-                  >{{
-                     (item.collapseButton["formatter"] &&
-                       item.collapseButton["formatter"](scope.row)) ||
-                       item.collapseButton["label"]
-                   }}
+                    >{{
+                      (item.collapseButton["formatter"] &&
+                        item.collapseButton["formatter"](scope.row)) ||
+                      item.collapseButton["label"]
+                    }}
                     <i
                       v-if="item.collapseButton['suffix']"
                       :class="item.collapseButton['suffix']"
@@ -254,17 +239,17 @@
                         style="margin-right: 10px"
                         :style="
                           (btn.handlestyle && btn.handlestyle(scope.row)) ||
-                            btn.style
+                          btn.style
                         "
                         :class="
                           (btn.handleclass && btn.handleclass(scope.row)) ||
-                            btn.class
+                          btn.class
                         "
                         @click="btn.handle(scope.row)"
-                      >{{
-                        (btn.formatter && btn.formatter(scope.row)) ||
+                        >{{
+                          (btn.formatter && btn.formatter(scope.row)) ||
                           btn.label
-                      }}
+                        }}
                       </el-button>
                     </el-dropdown-item>
                   </el-dropdown-menu>
@@ -306,7 +291,8 @@
                 v-for="(ra, index) in item.radios"
                 :key="index"
                 :label="ra.value"
-              >{{ ra.label }}</el-radio>
+                >{{ ra.label }}</el-radio
+              >
             </el-radio-group>
             <!-- 复选框 -->
             <el-checkbox-group
@@ -319,7 +305,7 @@
                 v-for="(ra, index) in item.checkboxs"
                 :key="index"
                 :label="ra.value"
-              >{{ ra.label }}
+                >{{ ra.label }}
               </el-checkbox>
             </el-checkbox-group>
             <!-- 评价 -->
@@ -383,8 +369,8 @@
             <!-- Array -->
             <span
               v-if="item.type === 'Array'"
-              :style="item.itemStyle && item.itemStyle(scope.row)"
-              :class="item.itemClass && item.item.itemClass(scope.row)"
+              :style="item.handlestyle && item.handlestyle(scope.row)"
+              :class="item.handleclass && item.handleclass(scope.row)"
             >
               <el-tooltip
                 v-if="scope.row[item.prop] && scope.row[item.prop].length > 0"
@@ -398,33 +384,30 @@
                     {{
                       (item.tooltipFormatter &&
                         item.tooltipFormatter(item_array)) ||
-                        item_array
-                    }}<br>
+                      item_array
+                    }}<br />
                   </div>
                 </div>
                 <span>
                   {{
                     (item.formatter && item.formatter(scope.row)) ||
-                      scope.row[item.prop][0]
+                    scope.row[item.prop][0]
                   }}
                 </span>
               </el-tooltip>
-              <span
-                v-else
-                style="color: rgba(144, 147, 153, 0.8)"
-              > 无 </span>
+              <span v-else style="color: rgba(144, 147, 153, 0.8)"> 无 </span>
             </span>
             <!-- 双击input -->
             <span
               v-if="item.type === 'dbClickInput'"
-              :style="item.itemStyle && item.itemStyle(scope.row)"
-              :class="item.itemClass && item.item.itemClass(scope.row)"
+              :style="item.handlestyle && item.handlestyle(scope.row)"
+              :class="item.handleclass && item.handleclass(scope.row)"
             >
               <!-- <div v-if="scope.row[item.prop]"> -->
               <div
                 v-if="
                   scope.row.index === dbClickRowIndex &&
-                    scope.column.index === dbClickCellIndex
+                  scope.column.index === dbClickCellIndex
                 "
               >
                 <el-input
@@ -434,10 +417,7 @@
                   @blur="inputBlur(scope.row)"
                 />
               </div>
-              <div
-                v-else
-                class="cursor-pointer"
-              >
+              <div v-else class="cursor-pointer">
                 {{ scope.row[item.prop] }}
               </div>
               <!-- </div> -->
@@ -448,14 +428,11 @@
             <!-- 默认 -->
             <span
               v-if="!item.type"
-              :style="item.itemStyle && item.itemStyle(scope.row)"
-              :class="item.itemClass && item.item.itemClass(scope.row)"
+              :style="item.handlestyle && item.handlestyle(scope.row)"
+              :class="item.handleclass && item.handleclass(scope.row)"
             >
               <!-- tooltip -->
-              <el-tooltip
-                v-if="item.isTooltip"
-                placement="top"
-              >
+              <el-tooltip v-if="item.isTooltip" placement="top">
                 <div slot="content">
                   <span
                     v-html="
@@ -468,18 +445,15 @@
                   <span
                     v-if="
                       (item.formatter && item.formatter(scope.row)) ||
-                        scope.row[item.prop]
+                      scope.row[item.prop]
                     "
                   >
                     {{
                       (item.formatter && item.formatter(scope.row)) ||
-                        scope.row[item.prop]
+                      scope.row[item.prop]
                     }}
                   </span>
-                  <span
-                    v-else
-                    style="color: rgba(144, 147, 153, 0.8)"
-                  >
+                  <span v-else style="color: rgba(144, 147, 153, 0.8)">
                     无
                   </span>
                 </span>
@@ -489,18 +463,15 @@
                 <span
                   v-if="
                     (item.formatter && item.formatter(scope.row)) ||
-                      scope.row[item.prop]
+                    scope.row[item.prop]
                   "
                 >
                   {{
                     (item.formatter && item.formatter(scope.row)) ||
-                      scope.row[item.prop]
+                    scope.row[item.prop]
                   }}
                 </span>
-                <span
-                  v-else
-                  style="color: rgba(144, 147, 153, 0.8)"
-                > 无 </span>
+                <span v-else style="color: rgba(144, 147, 153, 0.8)"> 无 </span>
               </span>
             </span>
           </template>
@@ -508,10 +479,7 @@
       </el-table>
     </section>
     <!-- 分页 -->
-    <section
-      v-if="isPagination"
-      class="ces-pagination-wrapper"
-    >
+    <section v-if="isPagination" class="ces-pagination-wrapper">
       <el-pagination
         class="ces-pagination"
         layout="total,sizes ,prev, pager, next,jumper"
@@ -535,7 +503,7 @@ export default {
   directives: {
     focus: {
       // 指令的定义
-      inserted: function(el) {
+      inserted: function (el) {
         el.getElementsByTagName("input")[0].focus();
         // el.querySelector("input").focus();
       },
@@ -604,7 +572,7 @@ export default {
   },
   watch: {
     defaultSelections(val) {
-      this.$nextTick(function() {
+      this.$nextTick(function () {
         if (Array.isArray(val)) {
           val.forEach((row) => {
             this.$refs.cesTable.toggleRowSelection(row);

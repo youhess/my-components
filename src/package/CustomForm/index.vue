@@ -9,16 +9,13 @@
       :size="size"
     >
       <template>
-        <div
-          v-for="item in formConfigSon"
-          :key="item.id"
-        >
+        <div v-for="item in formConfigSon" :key="item.id">
           <!-- 自定义item slot -->
           <template v-if="item.type === 'Slot' || item.type === 'slot'">
             <div>
-              <slot
-                :name="item.name"
-              >我是{{ item.name }}内容区域，请填写自定义item</slot>
+              <slot :name="item.name"
+                >我是{{ item.name }}内容区域，请填写自定义item</slot
+              >
             </div>
           </template>
           <template v-else>
@@ -38,13 +35,32 @@
                 :disabled="
                   (item.handledisabled &&
                     item.handledisabled(customForm[item.prop])) ||
-                    item.disabled
+                  item.disabled
                 "
                 :size="size"
                 :placeholder="`请输入${item.name}`"
                 @change="item.change && item.change(customForm[item.prop])"
                 @input="item.input && item.input(customForm[item.prop])"
-              />
+              >
+                <template v-if="item.prependConfig" slot="prepend">
+                  <span v-if="item.prependConfig['label']">
+                    {{ item.prependConfig["label"] }}
+                  </span>
+                  <el-button
+                    v-if="item.prependConfig['icon']"
+                    :icon="item.prependConfig['icon']"
+                  />
+                </template>
+                <template v-if="item.appendConfig" slot="append">
+                  <span v-if="item.appendConfig['label']">
+                    {{ item.appendConfig["label"] }}
+                  </span>
+                  <el-button
+                    v-if="item.appendConfig['icon']"
+                    :icon="item.appendConfig['icon']"
+                  />
+                </template>
+              </el-input>
               <!-- 计数器 -->
               <el-input-number
                 v-if="item.type == 'inputNumber' || item.type == 'InputNumber'"
@@ -60,7 +76,7 @@
                 :disabled="
                   (item.handledisabled &&
                     item.handledisabled(customForm[item.prop])) ||
-                    item.disabled
+                  item.disabled
                 "
                 @change="item.change && item.change(customForm[item.prop])"
               />
@@ -79,7 +95,7 @@
                 :disabled="
                   (item.handledisabled &&
                     item.handledisabled(customForm[item.prop])) ||
-                    item.disabled
+                  item.disabled
                 "
                 :remote="item.remote"
                 :remote-method="item.remoteMethod"
@@ -104,7 +120,7 @@
                 :disabled="
                   (item.handledisabled &&
                     item.handledisabled(customForm[item.prop])) ||
-                    item.disabled
+                  item.disabled
                 "
                 :autosize="item.autosize"
                 :rows="item.rows"
@@ -122,7 +138,7 @@
                 :disabled="
                   (item.handledisabled &&
                     item.handledisabled(customForm[item.prop])) ||
-                    item.disabled
+                  item.disabled
                 "
                 :handle-upload="handleUpload"
               />
@@ -130,7 +146,7 @@
               <el-date-picker
                 v-if="
                   item.type === 'datetimePicker' ||
-                    item.type === 'DatetimePicker'
+                  item.type === 'DatetimePicker'
                 "
                 v-model="customForm[item.prop]"
                 :type="item.isRange ? 'datetimerange' : 'datetime'"
@@ -144,7 +160,7 @@
                 :disabled="
                   (item.handledisabled &&
                     item.handledisabled(customForm[item.prop])) ||
-                    item.disabled
+                  item.disabled
                 "
                 :range-separator="
                   item.rangeSeparator ? item.rangeSeparator : '~'
@@ -171,7 +187,7 @@
                 :disabled="
                   (item.handledisabled &&
                     item.handledisabled(customForm[item.prop])) ||
-                    item.disabled
+                  item.disabled
                 "
                 :range-separator="
                   item.rangeSeparator ? item.rangeSeparator : '~'
@@ -192,7 +208,7 @@
                 :disabled="
                   (item.handledisabled &&
                     item.handledisabled(customForm[item.prop])) ||
-                    item.disabled
+                  item.disabled
                 "
                 @input="item.input && item.input(customForm[item.prop])"
               >
@@ -202,9 +218,39 @@
                   <el-radio
                     v-for="ra in item.radios"
                     :key="ra.value"
+                    :disabled="ra.disabled"
                     style="margin-right: 12px; padding: 3px 0"
                     :label="ra.value"
-                  >{{ ra.label }}</el-radio>
+                    >{{ ra.label }}</el-radio
+                  >
+                </div>
+              </el-radio-group>
+              <!-- 单选按钮样式 -->
+              <el-radio-group
+                v-if="
+                  item.type === 'radioGroupButton' ||
+                  item.type === 'RadioGroupButton'
+                "
+                v-model="customForm[item.prop]"
+                :size="item.size"
+                :style="{ width: item.width ? item.width : '100%' }"
+                :disabled="
+                  (item.handledisabled &&
+                    item.handledisabled(customForm[item.prop])) ||
+                  item.disabled
+                "
+                @input="item.input && item.input(customForm[item.prop])"
+              >
+                <div
+                  style="display: flex; flex-wrap: wrap; align-items: center"
+                >
+                  <el-radio-button
+                    v-for="ra in item.radios"
+                    :key="ra.value"
+                    :label="ra.value"
+                    :disabled="ra.disabled"
+                    >{{ ra.label }}</el-radio-button
+                  >
                 </div>
               </el-radio-group>
               <!-- 开关 -->
@@ -214,7 +260,7 @@
                 :disabled="
                   (item.handledisabled &&
                     item.handledisabled(customForm[item.prop])) ||
-                    item.disabled
+                  item.disabled
                 "
                 :active-value="item.activeValue"
                 :inactive-value="item.inactiveValue"
@@ -230,7 +276,7 @@
                 :disabled="
                   (item.handledisabled &&
                     item.handledisabled(customForm[item.prop])) ||
-                    item.disabled
+                  item.disabled
                 "
                 :node-key="item.nodeKey"
                 :custom-id="item.customId"
@@ -250,14 +296,8 @@
         </div>
       </template>
     </el-form>
-    <div
-      v-if="isHandle"
-      class="footer"
-    >
-      <span
-        v-for="(item, index) in handleConfig"
-        :key="index"
-      >
+    <div v-if="isHandle" class="footer">
+      <span v-for="(item, index) in handleConfig" :key="index">
         <el-button
           v-if="item.isShow ? item.isShow() : true"
           :type="item.type"
@@ -266,7 +306,8 @@
             (item.handledisabled && item.handledisabled()) || item.disabled
           "
           @click="item.handle()"
-        >{{ item.label }}</el-button>
+          >{{ item.label }}</el-button
+        >
       </span>
     </div>
   </div>
@@ -282,7 +323,7 @@ export default {
         const SELECT_DOM = el.querySelector(
           ".el-select-dropdown .el-select-dropdown__wrap"
         );
-        SELECT_DOM.addEventListener("scroll", function() {
+        SELECT_DOM.addEventListener("scroll", function () {
           const condition =
             this.scrollHeight - this.scrollTop <= this.clientHeight;
           if (condition) {
@@ -358,10 +399,10 @@ export default {
                 message: item.message
                   ? item.message
                   : `${
-                    textMatch[item.type]
-                      ? textMatch[item.type]["text"]
-                      : "请输入"
-                  }${item.name}`,
+                      textMatch[item.type]
+                        ? textMatch[item.type]["text"]
+                        : "请输入"
+                    }${item.name}`,
                 trigger: textMatch[item.type]
                   ? textMatch[item.type]["trigger"]
                   : "blur",
@@ -381,10 +422,10 @@ export default {
                 message: item.message
                   ? item.message
                   : `${
-                    textMatch[item.type]
-                      ? textMatch[item.type]["text"]
-                      : "请输入"
-                  }${item.name}`,
+                      textMatch[item.type]
+                        ? textMatch[item.type]["text"]
+                        : "请输入"
+                    }${item.name}`,
                 trigger: textMatch[item.type]
                   ? textMatch[item.type]["trigger"]
                   : "blur",
