@@ -21,3 +21,8 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+*.common.js
+*.common.js.map
+*.umd.js
+*.umd.js.map
+*.umd.min.js.map

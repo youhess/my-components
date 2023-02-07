@@ -46,6 +46,7 @@
                     "
                     :size="size"
                     :placeholder="`请输入${item.name}`"
+                    :show-password="item.showPassword"
                     @change="item.change && item.change(customForm[item.prop])"
                     @input="item.input && item.input(customForm[item.prop])"
                   >
