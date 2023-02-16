@@ -1,4 +1,4 @@
- ## 目录
+## 目录
 
 [TOC]
 
@@ -56,7 +56,7 @@ isHandle为true的情况下
 | ------ | ------------------------------- | ------ | --------------------------------------------------------------------------------------------------- | --- |
 | \*name | item名称，用于显示label以及部分placeholder | String |                                                                                                     |     |
 | span   | 布局占比                            | Number |                                                                                                     | 24  |
-| type   | 类型                              | String | Input/InputNumber/Select/Textarea/Image/DatetimePicker/DatePicker/RadioGroup/Switch/SelectTree/Slot |     |
+| type   | 类型                              | String | Input/InputNumber/Select/Textarea/Image/DatetimePicker/DatePicker/RadioGroup/Switch/SelectTree/CheckBox/Slot |     |
 
 #### 基于通用配置项-> ==type== ，进而使用的配置项:
 
@@ -264,6 +264,22 @@ isHandle为true的情况下
 | rules          | item自定义校验                                                                | Object/Array | -   |                                     |
 | tip            | 提示语                                                                      | String       |     | ""                                  |
 |                |                                                                          |              | -   |                                     |
+
+##### type:CheckBox 单选checkBox
+
+| 参数             | 说明                                                                  | 类型           | 可选值 | 默认值      |
+| ------- | --------- | ------------ | --- | ----- |
+| \*prop         | 字段名称 | String       |     |        |
+| disabled       | 是否禁用  | Boolean      | -   |           |
+| handledisabled | 方法调用控制是否禁用， return必须为boolean，(itemInfo)=>{} 返回参数当前表单item值   | Function     |     |       |
+| change  | 触发change方法，向外携带当前修改参数的值     | Function |-|        |
+| required       | 是否必填  | Boolean      | -   | false       |
+| message        | 自定义message   | String       | -   |        |
+| rules          | item自定义校验  | Object/Array | -   |       |
+| tip            | 提示语   | String       |     | ""   |
+|                |             |        | -   |    |
+
+
 
 ##### type\:Slot
 

@@ -57,6 +57,7 @@
         v-loading="loading"
         style="width: 100%"
         :header-cell-style="headerCellStyle"
+        :cell-style="cellStyle"
         :data="tableData"
         :size="size"
         :border="isBorder"
@@ -143,7 +144,7 @@
             <!-- html -->
             <span v-if="item.type === 'Html'" v-html="item.html(scope.row)" />
             <!-- 按钮 -->
-            <span v-if="item.type === 'Button'">
+            <span v-else-if="item.type === 'Button'">
               <template>
                 <span
                   v-for="(btn, index) in item.btnList.slice(
@@ -258,15 +259,16 @@
             </span>
             <!-- 输入框 -->
             <el-input
-              v-if="item.type === 'Input'"
+              v-else-if="item.type === 'Input'"
               v-model="scope.row[item.prop]"
               :size="size"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
+              :readonly="item.readonly && item.readonly(scope.row)"
               @focus="item.focus && item.focus(scope.row)"
             />
             <!-- 下拉框 -->
             <el-select
-              v-if="item.type === 'Select'"
+              v-else-if="item.type === 'Select'"
               v-model="scope.row[item.prop]"
               :size="size"
               :props="item.props"
@@ -282,7 +284,7 @@
             </el-select>
             <!-- 单选 -->
             <el-radio-group
-              v-if="item.type === 'Radio'"
+              v-else-if="item.type === 'Radio'"
               v-model="scope.row[item.prop]"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
               @change="item.change && item.change(scope.row)"
@@ -296,7 +298,7 @@
             </el-radio-group>
             <!-- 复选框 -->
             <el-checkbox-group
-              v-if="item.type === 'Checkbox'"
+              v-else-if="item.type === 'CheckboxGroup'"
               v-model="scope.row[item.prop]"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
               @change="item.change && item.change(scope.row)"
@@ -308,16 +310,24 @@
                 >{{ ra.label }}
               </el-checkbox>
             </el-checkbox-group>
+            <!-- checkbox 单选 -->
+            <el-checkbox
+              v-else-if="item.type === 'CheckBox'"
+              v-model="scope.row[item.prop]"
+              :disabled="item.isDisabled && item.isDisabled(scope.row)"
+              @change="item.change && item.change(scope.row)"
+              >{{ item.name }}
+            </el-checkbox>
             <!-- 评价 -->
             <el-rate
-              v-if="item.type === 'Rate'"
+              v-else-if="item.type === 'Rate'"
               v-model="scope.row[item.prop]"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
               @change="item.change && item.change(scope.row)"
             />
             <!-- 开关 -->
             <el-switch
-              v-if="item.type === 'Switch'"
+              v-else-if="item.type === 'Switch'"
               v-model="scope.row[item.prop]"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
               :active-value="item.activeValue"
@@ -325,7 +335,7 @@
               @change="item.change && item.change(scope.row)"
             />
             <!-- 图像 -->
-            <div v-if="item.type === 'Image'">
+            <div v-else-if="item.type === 'Image'">
               <!-- <img
                 :src="scope.row[item.prop]"
                 @click="item.handle && item.handle(scope.row)"
@@ -355,20 +365,20 @@
             </div>
             <!-- 滑块 -->
             <el-slider
-              v-if="item.type === 'Slider'"
+              v-else-if="item.type === 'Slider'"
               v-model="scope.row[item.prop]"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
               @change="item.change && item.change(scope.row)"
             />
             <!-- BxTag -->
             <BxTag
-              v-if="item.type === 'BxTag'"
+              v-else-if="item.type === 'BxTag'"
               :status="item.status && item.status(scope.row)"
               :txt="item.txt && item.txt(scope.row)"
             />
             <!-- Array -->
             <span
-              v-if="item.type === 'Array'"
+              v-else-if="item.type === 'Array'"
               :style="item.handlestyle && item.handlestyle(scope.row)"
               :class="item.handleclass && item.handleclass(scope.row)"
             >
@@ -399,7 +409,7 @@
             </span>
             <!-- 双击input -->
             <span
-              v-if="item.type === 'dbClickInput'"
+              v-else-if="item.type === 'dbClickInput'"
               :style="item.handlestyle && item.handlestyle(scope.row)"
               :class="item.handleclass && item.handleclass(scope.row)"
             >
@@ -427,7 +437,7 @@
             </span>
             <!-- 默认 -->
             <span
-              v-if="!item.type"
+              v-else-if="!item.type"
               :style="item.handlestyle && item.handlestyle(scope.row)"
               :class="item.handleclass && item.handleclass(scope.row)"
             >
@@ -551,11 +561,15 @@ export default {
       default: () => ({ pageSize: 10, pageNum: 1, total: 0 }),
     },
     headerCellStyle: {
-      type: Object,
+      type: [Object, Function],
       default: () => ({
         background: "#fafafa",
         color: "#606266",
       }),
+    },
+    cellStyle: {
+      type: [Object, Function],
+      default: () => {},
     },
   },
   data() {
@@ -589,11 +603,19 @@ export default {
       this.newTableKey = this.newTableKey + 1; // 为了保证table 每次都会重渲 In order to ensure the table will be re-rendered each time
     },
     tableKey(newVal) {
+      console.log("newVal", newVal);
       this.newTableKey = newVal;
     },
     newPagination: {
       handler(newVal) {
         this.$emit("update:pagination", newVal);
+      },
+      deep: true,
+    },
+    tableCols: {
+      handler(newVal) {
+        this.changedTableCols = newVal;
+        this.defaultTableCols = newVal;
       },
       deep: true,
     },

@@ -7,14 +7,8 @@
       :size="size"
       :border="border"
     >
-      <template
-        v-if="isExtra"
-        slot="extra"
-      >
-        <slot
-          name="extra"
-          :desDetail="descriptionData"
-        >我是extra内容区域</slot>
+      <template v-if="isExtra" slot="extra">
+        <slot name="extra" :desDetail="descriptionData">我是extra内容区域</slot>
       </template>
       <el-descriptions-item
         v-for="(item, index) in descriptionData"
@@ -26,20 +20,14 @@
         :content-style="item.contentStyle || contentStyle"
       >
         <template slot="label">
-          <i
-            v-if="item.icon"
-            :class="item.icon"
-          />
+          <i v-if="item.icon" :class="item.icon" />
           <!-- 标题 -->
           <span v-if="item.title">
             {{ item.title }}
           </span>
         </template>
         <!-- 默认情况下 -->
-        <span
-          v-if="!item.type"
-          class="default-type"
-        >
+        <span v-if="!item.type" class="default-type">
           <span>
             {{ (item.formatter && item.formatter(item)) || item.value }}
           </span>
@@ -61,38 +49,26 @@
               :src="item.value"
               :preview-src-list="[item.value]"
             >
-              <div
-                slot="error"
-                class="image-slot"
-              >
+              <div slot="error" class="image-slot">
                 <i class="el-icon-picture-outline" />
               </div>
             </el-image>
             <!-- 为多张的时候 -->
             <template v-else>
-              <span
-                v-for="(i, img_index) in item.value"
-                :key="img_index"
-              >
+              <span v-for="(i, img_index) in item.value" :key="img_index">
                 <el-image
                   style="width: 35px; margin-right: 6px"
                   :src="i"
                   :preview-src-list="item.value"
                 >
-                  <div
-                    slot="error"
-                    class="image-slot"
-                  >
+                  <div slot="error" class="image-slot">
                     <i class="el-icon-picture-outline" />
                   </div>
                 </el-image>
               </span>
             </template>
           </span>
-          <span
-            v-else
-            class="empty-txt"
-          >无</span>
+          <span v-else class="empty-txt">无</span>
         </div>
         <!-- 双击label input切换 -->
         <div
@@ -126,7 +102,7 @@
           :disabled="
             (item.handledisabled &&
               item.handledisabled(customForm[item.prop])) ||
-              item.disabled
+            item.disabled
           "
           :size="item.size ? item.size : size"
           :placeholder="`请输入${item.name}`"
@@ -134,10 +110,7 @@
           @change="item.change && item.change(customForm[item.prop])"
           @input="item.input && item.input(customForm[item.prop])"
         >
-          <template
-            v-if="item.prependConfig"
-            slot="prepend"
-          >
+          <template v-if="item.prependConfig" slot="prepend">
             <span v-if="item.prependConfig['label']">
               {{ item.prependConfig["label"] }}
             </span>
@@ -146,10 +119,7 @@
               :icon="item.prependConfig['icon']"
             />
           </template>
-          <template
-            v-if="item.appendConfig"
-            slot="append"
-          >
+          <template v-if="item.appendConfig" slot="append">
             <span v-if="item.appendConfig['label']">
               {{ item.appendConfig["label"] }}
             </span>
@@ -174,7 +144,7 @@
           :disabled="
             (item.handledisabled &&
               item.handledisabled(customForm[item.prop])) ||
-              item.disabled
+            item.disabled
           "
           :remote="item.remote"
           :remote-method="item.remoteMethod"
@@ -190,10 +160,9 @@
         </el-select>
         <!-- 需要自定义情况下添加Slot -->
         <div v-if="item.type === 'slot' || item.type === 'Slot'">
-          <slot
-            :name="item.name"
-            :item="item"
-          >我是{{ item.name }}内容区域,scope返回值为item</slot>
+          <slot :name="item.name" :item="item"
+            >我是{{ item.name }}内容区域,scope返回值为item</slot
+          >
         </div>
       </el-descriptions-item>
     </el-descriptions>
@@ -206,7 +175,7 @@ export default {
   directives: {
     focus: {
       // 指令的定义
-      inserted: function(el) {
+      inserted: function (el) {
         el.getElementsByTagName("input")[0].focus();
         // el.querySelector("input").focus();
       },
@@ -216,7 +185,7 @@ export default {
         const SELECT_DOM = el.querySelector(
           ".el-select-dropdown .el-select-dropdown__wrap"
         );
-        SELECT_DOM.addEventListener("scroll", function() {
+        SELECT_DOM.addEventListener("scroll", function () {
           const condition =
             this.scrollHeight - this.scrollTop <= this.clientHeight;
           if (condition) {
@@ -267,6 +236,14 @@ export default {
       dbClickInputName: "",
       descriptionData: this.data,
     };
+  },
+  watch: {
+    data: {
+      handler(newVal) {
+        this.descriptionData = newVal;
+      },
+      deep: true,
+    },
   },
   methods: {
     handleDbClickInput(item) {
