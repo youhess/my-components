@@ -5,7 +5,8 @@
       :title="title"
       :column="column"
       :size="size"
-      :border="border"
+      :border="border" 
+      :direction="direction"
     >
       <template v-if="isExtra" slot="extra">
         <slot name="extra" :desDetail="descriptionData">我是extra内容区域</slot>
@@ -28,16 +29,17 @@
         </template>
         <!-- 默认情况下 -->
         <span v-if="!item.type" class="default-type">
-          <span>
+          <span v-if="(item.formatter && item.formatter(item)) || item.value">
             {{ (item.formatter && item.formatter(item)) || item.value }}
+            <i
+              v-if="item.isCopy"
+              class="el-icon-document-copy copy-icon"
+              @click="
+                copy((item.formatter && item.formatter(item)) || item.value)
+              "
+            />
           </span>
-          <i
-            v-if="item.isCopy"
-            class="el-icon-document-copy copy-icon"
-            @click="
-              copy((item.formatter && item.formatter(item)) || item.value)
-            "
-          />
+          <span v-else style="color: #909399"> 暂无 </span>
         </span>
         <!-- 图像 -->
         <div v-if="item.type === 'image' || item.type === 'Image'">
@@ -68,28 +70,31 @@
               </span>
             </template>
           </span>
-          <span v-else class="empty-txt">无</span>
+          <span v-else style="color: #909399"> 暂无 </span>
         </div>
         <!-- 双击label input切换 -->
         <div
           v-if="item.type === 'dbClickInput' || item.type === 'DbClickInput'"
         >
-          <div v-if="dbClickInputFlag && dbClickInputName === item.name">
-            <el-input
-              v-model="item.value"
-              v-focus
-              :style="{ width: item.width ? item.width : '100%' }"
-              :size="item.size ? item.size : size"
-              @blur="inputBlur(item, () => item.blur && item.blur(item))"
-            />
+          <div v-if="(item.formatter && item.formatter(item)) || item.value">
+            <div v-if="dbClickInputFlag && dbClickInputName === item.name">
+              <el-input
+                v-model="item.value"
+                v-focus
+                :style="{ width: item.width ? item.width : '100%' }"
+                :size="item.size ? item.size : size"
+                @blur="inputBlur(item, () => item.blur && item.blur(item))"
+              />
+            </div>
+            <span
+              v-else
+              style="cursor: pointer"
+              @dblclick="handleDbClickInput(item)"
+            >
+              {{ (item.formatter && item.formatter(item)) || item.value }}
+            </span>
           </div>
-          <span
-            v-else
-            style="cursor: pointer"
-            @dblclick="handleDbClickInput(item)"
-          >
-            {{ (item.formatter && item.formatter(item)) || item.value }}
-          </span>
+          <span v-else style="color: #909399"> 暂无 </span>
         </div>
         <!-- 输入框 -->
         <el-input
@@ -211,6 +216,10 @@ export default {
     },
     title: {
       default: "",
+      type: String,
+    },
+    direction: {
+      default: "horizontal",
       type: String,
     },
     column: {

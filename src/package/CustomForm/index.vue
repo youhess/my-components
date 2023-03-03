@@ -4,38 +4,65 @@
       ref="ruleCustomForm"
       :label-position="labelPosition"
       :model="customForm"
-      label-width="100px"
+      :label-width="labelWidth"
       class="demo-ruleForm"
       :size="size"
     >
       <!-- Layout 布局 -->
-      <el-row>
+      <el-row :gutter="gutter" type="flex" style="flex-wrap: wrap">
         <template>
-          <div
+          <el-col
             v-for="item in formConfigSon"
             :key="item.id"
+            :span="item.span ? item.span : 24"
           >
-            <el-col :span="item.span ? item.span : 24">
-              <!-- 自定义item slot -->
-              <template v-if="item.type === 'Slot' || item.type === 'slot'">
-                <div>
-                  <slot
-                    :name="item.name"
-                    :item="item"
-                  >我是{{ item.name }}内容区域，请填写自定义item</slot>
-                </div>
-              </template>
+            <!-- 自定义item slot -->
+            <template v-if="item.type === 'Slot' || item.type === 'slot'">
+              <div>
+                <slot :name="item.name" :item="item"
+                  >我是{{ item.name }}内容区域，请填写自定义item</slot
+                >
+              </div>
+            </template>
 
-              <template v-else>
+            <template v-else>
+              <div class="form-item">
                 <el-form-item
                   :label="item.name"
                   :prop="item.prop"
                   :rules="item.rules ? item.rules : customFormrules[item.prop]"
                 >
+                  <template #label>
+                    <span>
+                      <span v-if="!item.labelConfig">{{ item.name }}</span>
+                      <span v-else>
+                        <span>
+                          {{ item.labelConfig["name"] || item.name }}
+                        </span>
+                        <el-tooltip
+                          class="item"
+                          effect="dark"
+                          :content="item.labelConfig['content']"
+                          placement="top-start"
+                        >
+                          <el-button
+                            type="text"
+                            :style="
+                              (item.labelConfig['handlestyle'] &&
+                                item.labelConfig['handlestyle']()) ||
+                              item.labelConfig['style']
+                            "
+                            :class="item.labelConfig['icon']"
+                          />
+                        </el-tooltip>
+                      </span>
+                    </span>
+                  </template>
                   <!-- 输入框 -->
                   <el-input
                     v-if="item.type == 'input' || item.type == 'Input'"
                     v-model="customForm[item.prop]"
+                    :class="item.isBottomLine ? 'input-style' : ''"
                     :style="{ width: item.width ? item.width : '100%' }"
                     clearable
                     :maxlength="item.maxlength"
@@ -43,18 +70,22 @@
                     :disabled="
                       (item.handledisabled &&
                         item.handledisabled(customForm[item.prop])) ||
-                        item.disabled
+                      item.disabled
                     "
                     :size="size"
-                    :placeholder="`请输入${item.name}`"
+                    :placeholder="item.placeholder || `请输入${item.name}`"
                     :show-password="item.showPassword"
                     @change="item.change && item.change(customForm[item.prop])"
-                    @input="item.input && item.input(customForm[item.prop])"
+                    @input="
+                      handleInput(
+                        $event,
+                        item.oninput,
+                        item.input && item.input(customForm[item.prop]),
+                        item.prop
+                      )
+                    "
                   >
-                    <template
-                      v-if="item.prependConfig"
-                      slot="prepend"
-                    >
+                    <template v-if="item.prependConfig" slot="prepend">
                       <span v-if="item.prependConfig['label']">
                         {{ item.prependConfig["label"] }}
                       </span>
@@ -63,10 +94,7 @@
                         :icon="item.prependConfig['icon']"
                       />
                     </template>
-                    <template
-                      v-if="item.appendConfig"
-                      slot="append"
-                    >
+                    <template v-if="item.appendConfig" slot="append">
                       <span v-if="item.appendConfig['label']">
                         {{ item.appendConfig["label"] }}
                       </span>
@@ -94,7 +122,7 @@
                     :disabled="
                       (item.handledisabled &&
                         item.handledisabled(customForm[item.prop])) ||
-                        item.disabled
+                      item.disabled
                     "
                     @change="item.change && item.change(customForm[item.prop])"
                   />
@@ -113,11 +141,11 @@
                     :disabled="
                       (item.handledisabled &&
                         item.handledisabled(customForm[item.prop])) ||
-                        item.disabled
+                      item.disabled
                     "
                     :remote="item.remote"
                     :remote-method="item.remoteMethod"
-                    :placeholder="`请输入${item.name}`"
+                    :placeholder="item.placeholder || `请输入${item.name}`"
                     @change="item.change && item.change(customForm[item.prop])"
                   >
                     <el-option
@@ -140,12 +168,12 @@
                     :disabled="
                       (item.handledisabled &&
                         item.handledisabled(customForm[item.prop])) ||
-                        item.disabled
+                      item.disabled
                     "
                     :autosize="item.autosize"
                     :rows="item.rows"
                     :maxlength="item.maxlength"
-                    :placeholder="`请输入${item.name}`"
+                    :placeholder="item.placeholder || `请输入${item.name}`"
                     :show-word-limit="item.showWordLimit"
                     @change="item.change && item.change(customForm[item.prop])"
                     @input="item.input && item.input(customForm[item.prop])"
@@ -158,7 +186,7 @@
                     :disabled="
                       (item.handledisabled &&
                         item.handledisabled(customForm[item.prop])) ||
-                        item.disabled
+                      item.disabled
                     "
                     :handle-upload="handleUpload"
                   />
@@ -166,21 +194,23 @@
                   <el-date-picker
                     v-else-if="
                       item.type === 'datetimePicker' ||
-                        item.type === 'DatetimePicker'
+                      item.type === 'DatetimePicker'
                     "
                     v-model="customForm[item.prop]"
                     :type="item.isRange ? 'datetimerange' : 'datetime'"
                     :prefix-icon="
                       item.prefixIcon ? item.prefixIcon : 'el-icon-date'
                     "
-                    :start-placeholder="`开始${item.name}`"
-                    :end-placeholder="`截止${item.name}`"
-                    :placeholder="`选择${item.name}`"
+                    :start-placeholder="
+                      item.startPlaceholder || `开始${item.name}`
+                    "
+                    :end-placeholder="item.endPlaceholder || `截止${item.name}`"
+                    :placeholder="item.placeholder || `选择${item.name}`"
                     :size="size"
                     :disabled="
                       (item.handledisabled &&
                         item.handledisabled(customForm[item.prop])) ||
-                        item.disabled
+                      item.disabled
                     "
                     :range-separator="
                       item.rangeSeparator ? item.rangeSeparator : '~'
@@ -204,14 +234,16 @@
                     :prefix-icon="
                       item.prefixIcon ? item.prefixIcon : 'el-icon-date'
                     "
-                    :start-placeholder="`开始${item.name}`"
-                    :end-placeholder="`截止${item.name}`"
-                    :placeholder="`请选择${item.name}`"
+                    :start-placeholder="
+                      item.startPlaceholder || `开始${item.name}`
+                    "
+                    :end-placeholder="item.endPlaceholder || `截止${item.name}`"
+                    :placeholder="item.placeholder || `选择${item.name}`"
                     :size="size"
                     :disabled="
                       (item.handledisabled &&
                         item.handledisabled(customForm[item.prop])) ||
-                        item.disabled
+                      item.disabled
                     "
                     :range-separator="
                       item.rangeSeparator ? item.rangeSeparator : '~'
@@ -221,6 +253,26 @@
                     "
                     :style="{ width: item.width ? item.width : '100%' }"
                     :picker-options="item.pickerOptions"
+                    @change="item.change && item.change(customForm[item.prop])"
+                  />
+                  <el-date-picker
+                    v-else-if="item.type === 'date' || item.type === 'Date'"
+                    v-model="customForm[item.prop]"
+                    type="date"
+                    :value-format="
+                      item.valueFormat
+                        ? item.valueFormat
+                        : 'yyyy-MM-dd HH:mm:ss'
+                    "
+                    :style="{ width: item.width ? item.width : '100%' }"
+                    :picker-options="item.pickerOptions"
+                    :placeholder="item.placeholder || `选择${item.name}`"
+                    :size="size"
+                    :disabled="
+                      (item.handledisabled &&
+                        item.handledisabled(customForm[item.prop])) ||
+                      item.disabled
+                    "
                     @change="item.change && item.change(customForm[item.prop])"
                   />
                   <!-- 单选按钮 -->
@@ -234,7 +286,7 @@
                     :disabled="
                       (item.handledisabled &&
                         item.handledisabled(customForm[item.prop])) ||
-                        item.disabled
+                      item.disabled
                     "
                     @input="item.input && item.input(customForm[item.prop])"
                   >
@@ -253,10 +305,10 @@
                           :span="item.vertical ? 24 : ra.span ? ra.span : 4"
                         >
                           <el-radio
-                            :disabled="ra.disabled"
+                            :disabled="ra.disabled || item.disabled"
                             style="margin-right: 12px; padding: 3px 0"
                             :label="ra.value"
-                          >{{ ra.label }}
+                            >{{ ra.label }}
                           </el-radio>
                         </el-col>
                       </el-row>
@@ -268,7 +320,7 @@
                   <el-radio-group
                     v-else-if="
                       item.type === 'radioGroupButton' ||
-                        item.type === 'RadioGroupButton'
+                      item.type === 'RadioGroupButton'
                     "
                     v-model="customForm[item.prop]"
                     :size="item.size"
@@ -276,23 +328,18 @@
                     :disabled="
                       (item.handledisabled &&
                         item.handledisabled(customForm[item.prop])) ||
-                        item.disabled
+                      item.disabled
                     "
                     @input="item.input && item.input(customForm[item.prop])"
                   >
-                    <div
-                      style="
-                        display: flex;
-                        flex-wrap: wrap;
-                        align-items: center;
-                      "
-                    >
+                    <div class="radio-group-style">
                       <el-radio-button
                         v-for="ra in item.radios"
                         :key="ra.value"
                         :label="ra.value"
-                        :disabled="ra.disabled"
-                      >{{ ra.label }}</el-radio-button>
+                        :disabled="ra.disabled || item.disabled"
+                        >{{ ra.label }}</el-radio-button
+                      >
                     </div>
                   </el-radio-group>
                   <!-- 开关 -->
@@ -302,7 +349,7 @@
                     :disabled="
                       (item.handledisabled &&
                         item.handledisabled(customForm[item.prop])) ||
-                        item.disabled
+                      item.disabled
                     "
                     :size="item.size"
                     :active-value="item.activeValue"
@@ -315,14 +362,15 @@
                       item.type === 'selectTree' || item.type == 'SelectTree'
                     "
                     v-model="customForm[item.prop]"
-                    :placeholder="`请选择${item.name}`"
+                    :placeholder="item.placeholder || `请选择${item.name}`"
                     :tree-props="item.treeProps"
                     :data="item.data"
                     :disabled="
                       (item.handledisabled &&
                         item.handledisabled(customForm[item.prop])) ||
-                        item.disabled
+                      item.disabled
                     "
+                    :style="{ width: item.width ? item.width : '100%' }"
                     :node-key="item.nodeKey"
                     :custom-id="item.customId"
                     @change="item.change && item.change(customForm[item.prop])"
@@ -337,10 +385,10 @@
                     :disabled="
                       (item.handledisabled &&
                         item.handledisabled(customForm[item.prop])) ||
-                        item.disabled
+                      item.disabled
                     "
                     @change="item.change && item.change(customForm[item.prop])"
-                  >{{ item.label }}
+                    >{{ item.label }}
                   </el-checkbox>
                   <!-- 地域选择器 -->
                   <el-cascader
@@ -351,35 +399,57 @@
                     :size="item.size"
                     :style="{ width: item.width ? item.width : '100%' }"
                     :options="regionOptions"
-                    :placeholder="`请输入${item.name}...`"
+                    :placeholder="item.placeholder || `请输入${item.name}`"
+                    :disabled="
+                      (item.handledisabled &&
+                        item.handledisabled(customForm[item.prop])) ||
+                      item.disabled
+                    "
                     clearable
                   />
                   <radio-group-input
                     v-else-if="
                       item.type === 'radioGroupInput' ||
-                        item.type == 'RadioGroupInput'
+                      item.type == 'RadioGroupInput'
                     "
                     v-model="customForm[item.prop]"
                     :vertical="item.vertical"
                     :radios="item.radios"
                     :size="item.size"
                     :width="item.width"
+                    :disabled="
+                      (item.handledisabled &&
+                        item.handledisabled(customForm[item.prop])) ||
+                      item.disabled
+                    "
                   />
                   <checkbox-group-input
                     v-else-if="
                       item.type === 'checkboxGroupInput' ||
-                        item.type == 'CheckboxGroupInput'
+                      item.type == 'CheckboxGroupInput'
                     "
                     v-model="customForm[item.prop]"
                     :vertical="item.vertical"
                     :options="item.options"
                     :size="item.size"
+                    :disabled="
+                      (item.handledisabled &&
+                        item.handledisabled(customForm[item.prop])) ||
+                      item.disabled
+                    "
                     :width="item.width"
                   />
                   <matrix
                     v-else-if="item.type === 'matrix' || item.type == 'Matrix'"
                     v-model="customForm[item.prop]"
+                    :width="item.width"
+                    :label-width="item.labelWidth"
                     :data="item.data"
+                    :disabled="
+                      (item.handledisabled &&
+                        item.handledisabled(customForm[item.prop])) ||
+                      item.disabled
+                    "
                   />
                   <!-- 应为此处必须添加操作 -->
                   <auto-table
@@ -387,9 +457,15 @@
                       item.type === 'autoTable' || item.type == 'AutoTable'
                     "
                     v-model="customForm[item.prop]"
+                    :width="item.width"
                     :table-cols="item.tableCols"
                     :length-min="item.lengthMin"
                     :length-max="item.lengthMax"
+                    :disabled="
+                      (item.handledisabled &&
+                        item.handledisabled(customForm[item.prop])) ||
+                      item.disabled
+                    "
                   />
                   <!-- tip 提示语  -->
                   <template>
@@ -401,21 +477,15 @@
                     </div>
                   </template>
                 </el-form-item>
-              </template>
-            </el-col>
-          </div>
+              </div>
+            </template>
+          </el-col>
         </template>
       </el-row>
     </el-form>
 
-    <div
-      v-if="isHandle"
-      class="footer"
-    >
-      <span
-        v-for="(item, index) in handleConfig"
-        :key="index"
-      >
+    <div v-if="isHandle" class="footer">
+      <span v-for="(item, index) in handleConfig" :key="index">
         <el-button
           v-if="item.isShow ? item.isShow() : true"
           :type="item.type"
@@ -424,7 +494,8 @@
             (item.handledisabled && item.handledisabled()) || item.disabled
           "
           @click="item.handle()"
-        >{{ item.label }}</el-button>
+          >{{ item.label }}</el-button
+        >
       </span>
     </div>
   </div>
@@ -446,7 +517,7 @@ export default {
         const SELECT_DOM = el.querySelector(
           ".el-select-dropdown .el-select-dropdown__wrap"
         );
-        SELECT_DOM.addEventListener("scroll", function() {
+        SELECT_DOM.addEventListener("scroll", function () {
           const condition =
             this.scrollHeight - this.scrollTop <= this.clientHeight;
           if (condition) {
@@ -481,6 +552,10 @@ export default {
       type: String,
       default: "top",
     },
+    labelWidth: {
+      type: String,
+      default: "100px",
+    },
     isHandle: {
       type: Boolean,
       default: false,
@@ -492,6 +567,10 @@ export default {
     handleUpload: {
       type: Function,
     },
+    gutter: {
+      type: Number,
+      default: 0,
+    },
   },
   data() {
     return {
@@ -500,36 +579,37 @@ export default {
       //   表单数据
       customForm: this.formData,
       customFormrules: [],
-      buttonCol: [{
-        label: "操作",
-        type: "Button",
-        width: "80",
-        fixed: "right",
-        name: "option",
-        btnList: [
-          {
-            type: "text",
-            icon: "el-icon-circle-plus-outline",
-            size: "small",
-            style: "color:#FF1600;font-size: 16px",
-            handle: () => {},
-          },
-          {
-            type: "text",
-            icon: "el-icon-remove-outline",
-            size: "small",
-            style: "font-size: 16px",
-            handle: () => {},
-          },
-        ],
-      }]
+      buttonCol: [
+        {
+          label: "操作",
+          type: "Button",
+          width: "80",
+          fixed: "right",
+          name: "option",
+          btnList: [
+            {
+              type: "text",
+              icon: "el-icon-circle-plus-outline",
+              size: "small",
+              style: "color:#FF1600;font-size: 16px",
+              handle: () => {},
+            },
+            {
+              type: "text",
+              icon: "el-icon-remove-outline",
+              size: "small",
+              style: "font-size: 16px",
+              handle: () => {},
+            },
+          ],
+        },
+      ],
     };
   },
   watch: {
     formConfig: {
       handler(newVal) {
         this.formConfigSon = newVal;
-        console.log("formData监听", newVal);
         // 添加customFormrules 表单验证
         const textMatch = {
           select: { text: "请选择", trigger: "change" },
@@ -550,10 +630,10 @@ export default {
                 message: item.message
                   ? item.message
                   : `${
-                    textMatch[item.type]
-                      ? textMatch[item.type]["text"]
-                      : "请输入"
-                  }${item.name}`,
+                      textMatch[item.type]
+                        ? textMatch[item.type]["text"]
+                        : "请输入"
+                    }${item.name}`,
                 trigger: textMatch[item.type]
                   ? textMatch[item.type]["trigger"]
                   : "blur",
@@ -573,10 +653,10 @@ export default {
                 message: item.message
                   ? item.message
                   : `${
-                    textMatch[item.type]
-                      ? textMatch[item.type]["text"]
-                      : "请输入"
-                  }${item.name}`,
+                      textMatch[item.type]
+                        ? textMatch[item.type]["text"]
+                        : "请输入"
+                    }${item.name}`,
                 trigger: textMatch[item.type]
                   ? textMatch[item.type]["trigger"]
                   : "blur",
@@ -614,9 +694,22 @@ export default {
           fn();
         } else {
           this.$message.error("信息填写有误！");
-          console.log("error submit!!");
           return false;
         }
+      });
+    },
+    // 验证表单
+    verify(fn) {
+      return new Promise((res, rej) => {
+        this.$refs["ruleCustomForm"].validate((valid) => {
+          if (valid) {
+            fn();
+            res(true);
+          } else {
+            this.$message.error("信息填写有误！");
+            rej(false);
+          }
+        });
       });
     },
     // 重置
@@ -624,17 +717,45 @@ export default {
       this.$refs[formName].resetFields();
       this.customForm = Object.assign({}, initialForm);
     },
+    handleInput(value, pattern, fn, field) {
+      value = value.replace(pattern, "");
+      this.customForm[field] = value;
+      fn;
+    },
   },
 };
 </script>
 <style lang="scss" scoped>
-::v-deep .el-textarea__inner {
-  // resize:none
-}
 .footer {
   margin-top: 10px;
   display: flex;
   gap: 10px;
   justify-content: flex-end;
 }
+
+.radio-group-style {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+::v-deep .input-style .el-input__inner {
+  border-radius: 0px;
+  border-top-width: 0px;
+  border-left-width: 0px;
+  border-right-width: 0px;
+  border-bottom-width: 0px;
+  /*outline: medium;*/
+
+  // border: 0 none;
+  // border-bottom: 1px solid #ccc;
+  // padding: 1px 2px;
+  // font-size: 14px;
+  // height: 19px !important;
+  // line-height: 19px !important;
+}
+
+// .form-item {
+//   min-width: 100%;
+//   height: 100%;
+// }
 </style>

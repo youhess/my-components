@@ -22,7 +22,12 @@
           :placeholder="item.placeholder"
           :clearable="clearable"
           @change="item.change && item.change(sonSearchData[item.prop])"
-        />
+        >
+          <i
+            slot="suffix"
+            class="el-input__icon el-icon-search"
+          />
+        </el-input>
         <!-- 下拉框 -->
         <el-select
           v-if="item.type === 'Select'"
@@ -99,6 +104,7 @@
           type="date"
           :style="{ width: item.width }"
           :picker-options="item.pickerOptions"
+          :value-format="item.valueFormat? item.valueFormat : 'yyyy-MM-dd HH:mm:ss'"
           @change="item.change && item.change(sonSearchData[item.prop])"
         />
         <!-- 时间 -->
@@ -109,6 +115,7 @@
           :picker-options="item.pickerOptions"
           :placeholder="item.placeholder"
           :style="{ width: item.width }"
+          :value-format="item.valueFormat? item.valueFormat : 'yyyy-MM-dd HH:mm:ss'"
           @change="item.change && item.change(sonSearchData[item.prop])"
         />
         <!-- 日期时间 -->
@@ -118,7 +125,7 @@
           type="datetime"
           :placeholder="item.placeholder"
           :disabled="item.disable && item.disable(sonSearchData[item.prop])"
-          :value-format="item.valueFormat"
+          :value-format="item.valueFormat? item.valueFormat : 'yyyy-MM-dd HH:mm:ss'"
           :picker-options="item.pickerOptions"
           :size="itemSize ? itemSize : item.size"
           :style="{ width: item.width }"
@@ -130,9 +137,10 @@
           v-model="sonSearchData[item.prop]"
           type="datetimerange"
           range-separator="~"
+          
           :start-placeholder="item.startPlaceholder"
           :end-placeholder="item.endPlaceholder"
-          :value-format="item.valueFormat"
+          :value-format="item.valueFormat? item.valueFormat : 'yyyy-MM-dd HH:mm:ss'"
           :picker-options="item.pickerOptions"
           :size="itemSize ? itemSize : item.size"
           @change="item.change && item.change(sonSearchData[item.prop])"
@@ -146,7 +154,7 @@
           :placeholder="item.placeholder"
           :disabled="item.disable && item.disable(sonSearchData[item.prop])"
           :picker-options="item.pickerOptions"
-          :value-format="item.valueFormat"
+          :value-format="item.valueFormat? item.valueFormat : 'yyyy-MM-dd HH:mm:ss'"
           :size="itemSize ? itemSize : item.size"
           :style="{ width: item.width }"
           @change="item.change && item.change(sonSearchData[item.prop])"
@@ -262,17 +270,20 @@ export default {
   methods: {},
 };
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .search-form {
   display: flex;
   align-items: center;
-  .form {
-    .form-item {
+  ::v-deep .form {
+   .form-item {
       // .el-form-item__label {
       //   width: 80px !important;
       // }
-      margin-right: 12px;
+      margin-right: 17px;
     }
   }
+}
+::v-deep  .el-form-item{
+  margin-bottom: 16px;
 }
 </style>

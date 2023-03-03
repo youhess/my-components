@@ -16,6 +16,7 @@
       >{{ d_item.name || d_item.label }}</div>
       <el-input
         v-model="d_item.extraTxt"
+        :disabled="disabled"
         class="matix-input"
       />
 
@@ -25,7 +26,7 @@
 </template>
 <script>
 export default {
-  name: "MatrixTable",
+  name: "MatrixFilling",
   model: {
     // 定义model
     // 父组件v-model绑定的值传递给props中的value
@@ -41,6 +42,10 @@ export default {
     width: {
       type: String,
       default: "100%"
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
     value: {
       type: Array,
@@ -76,11 +81,14 @@ export default {
     },
     value: {
       handler(newVal) {
-        console.log();
-        newVal.forEach(item_1 => {
-          const res = this.dataChild.findIndex(item_2 => item_2.value === item_1.value)
-          this.$set(this.dataChild[res], "extraTxt", item_1.label)
-        })
+        // newVal.forEach(item_1 => {
+        //   const res = this.dataChild.findIndex(item_2 => item_2.value === item_1.value)
+        //   this.$set(this.dataChild[res], "extraTxt", item_1.label)
+        // })
+        for (const key in newVal[0]) {
+          const res = this.dataChild.findIndex(item_2 => item_2.value === Number(key))
+          if (res >= 0) this.$set(this.dataChild[res], "extraTxt", newVal[0][key])
+        }
       },
       deep: true,
       immediate: true,

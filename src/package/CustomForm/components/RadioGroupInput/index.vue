@@ -13,18 +13,26 @@
           <el-col
             v-for="ra in radios"
             :key="ra.value"
-            :span="vertical ? 24 : ra.span ? ra.span : 4"
+            :span="ra.extraTxt?null:vertical ? 24 : ra.span ? ra.span : 4"
           >
             <el-radio
-              :disabled="ra.disabled"
+              :disabled="ra.disabled||disabled"
               style="margin-right: 12px; padding: 3px 0"
               :label="ra.value"
             >
               {{ ra.label }}
               <el-input
-                v-if="ra.isRequired"
+                v-if="ra.isRequired && !disabled"
                 v-model="ra.extraTxt"
+                :disabled="disabled"
               />
+              <div
+                v-else-if="ra.extraTxt"
+                class="ml-4px"
+                style="text-decoration: underline;display: inline-block;"
+              >
+                {{ ra.extraTxt }}
+              </div>
             </el-radio>
           </el-col>
         </el-row>
@@ -51,6 +59,10 @@ export default {
       type: String,
       default: "",
     },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
     radios: {
       type: Array,
       default: () => [],
@@ -72,12 +84,12 @@ export default {
     };
   },
   watch: {
-    valueChild: {
+    value: {
       handler(newVal) {
-        this.radioValue = newVal["value"];
+        if (newVal && newVal["value"]) { this.radioValue = newVal["value"]; }
       },
       deep: true,
-      // immediate: true,
+      immediate: true,
     },
     // 填空发生更新时 同步至双项绑定
     radios: {

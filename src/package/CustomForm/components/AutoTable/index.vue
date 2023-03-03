@@ -2,7 +2,7 @@
   <div class="autoTable">
     <el-table
       ref="autoTable"
-      style="width: 100%"
+      :style="{ width: width || '100%' }"
       :header-cell-style="headerCellStyle"
       :cell-style="cellStyle"
       :data="tableData"
@@ -13,7 +13,7 @@
         <img
           style="width: 230px; height: 150px; margin: 50px auto"
           :src="'https://bluexiidev.obs.cn-east-3.myhuaweicloud.com:443/huawei/center/ad8fbd69e03f7e279ff4e0ce20f992432917d6725492a1a4ef2f157a348e1216.png'"
-        >
+        />
       </span>
       <!-- 数据栏 -->
       <el-table-column
@@ -33,16 +33,12 @@
           <el-input
             v-model="scope.row[item.prop]"
             :size="size"
-            :disabled="item.isDisabled && item.isDisabled(scope.row)"
-            :readonly="scope.$index + 1 < tableData.length"
+            :maxlength="10"
+            :disabled="item.isDisabled && item.isDisabled(scope.row)||disabled"
           />
         </template>
       </el-table-column>
-      <el-table-column
-        fixed="right"
-        label="操作"
-        width="100"
-      >
+      <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
           <div style="display: flex; justify-content: flex-start; gap: 10px">
             <el-button
@@ -51,6 +47,7 @@
               icon="el-icon-circle-plus-outline"
               style="color: #ff1600; font-size: 16px; margin: 0"
               size="small"
+              :disabled="disabled"
               @click="addItem(scope)"
             />
             <el-button
@@ -59,6 +56,7 @@
               icon="el-icon-remove-outline"
               style="font-size: 16px; margin: 0"
               size="small"
+              :disabled="disabled"
               @click="removeItem(scope)"
             />
           </div>
@@ -85,6 +83,10 @@ export default {
         color: "#606266",
       }),
     },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
     cellStyle: {
       type: [Object, Function],
       default: () => {},
@@ -94,12 +96,13 @@ export default {
       default: () => [],
     },
     size: { type: String, default: "small" },
-    lengthMax: { type: Number, default: 100 },
-    lengthMin: { type: Number, default: 2 },
+    lengthMax: { type: Number, default: 0 },
+    lengthMin: { type: Number, default: 0 },
     value: {
       type: Array,
       default: () => [],
     },
+    width: { type: String, default: "" }
   },
   data() {
     return {
@@ -108,12 +111,37 @@ export default {
     };
   },
   watch: {
+    value: {
+      handler(newVal) {
+        this.tableData = newVal
+      },
+      deep: true,
+      immediate: true,
+    },
     tableCols: {
       handler(newVal) {
+        const rowItem = {};
         // 生成自增对象
         newVal.forEach((item) => {
-          this.$set(this.autoRowItem, item.prop, "");
+          rowItem[item.prop] = "";
         });
+        this.autoRowItem = rowItem;
+      },
+      deep: true,
+      immediate: true,
+    },
+    autoRowItem: {
+      handler(newVal) {
+        // not defined seem as minimum 1
+        if (!this.lengthMin) {
+          this.tableData.push(JSON.parse(JSON.stringify(newVal)));
+        }
+        // regular
+        else {
+          for (let i = 0; i < this.lengthMin; i++) {
+            this.tableData.push(JSON.parse(JSON.stringify(newVal)));
+          }
+        }
       },
       deep: true,
       immediate: true,
@@ -123,28 +151,29 @@ export default {
     addItem(scope) {
       //   检查是否符合填写格式
 
-      const isEmpty = this.isEmptyObject(this.tableData[scope.$index]);
+      // const isEmpty = this.isEmptyObject(this.tableData[scope.$index]);
 
-      if (this.tableData.length >= this.lengthMax) {
+      if (this.lengthMax && this.tableData.length >= this.lengthMax) {
         this.$message({
           message: "已超过最大规定行数",
           type: "warning",
         });
-      } else if (!isEmpty) {
+      } else {
         this.tableData.splice(
           scope.$index + 1,
           0,
           JSON.parse(JSON.stringify(this.autoRowItem))
         );
-      } else {
-        this.$message({
-          message: "尚有字段未填",
-          type: "warning",
-        });
       }
+      //  else {
+      //   this.$message({
+      //     message: "尚有字段未填",
+      //     type: "warning",
+      //   });
+      // }
     },
     removeItem(scope) {
-      if (this.tableData.length <= this.lengthMin) {
+      if (this.lengthMin && this.tableData.length <= this.lengthMin) {
         this.$message({
           message: "不得小于最小规定行数",
           type: "warning",

@@ -13,18 +13,26 @@
           <el-col
             v-for="o_item in options"
             :key="o_item.value"
-            :span="vertical ? 24 : o_item.span ? o_item.span : 4"
+            :span="o_item.extraTxt?null:vertical ? 24 : o_item.span ? o_item.span : 4"
           >
             <el-checkbox
-              :disabled="o_item.disabled"
+              :disabled="o_item.disabled||disabled"
               style="margin-right: 12px; padding: 3px 0"
               :label="o_item.value"
             >
               {{ o_item.label }}
               <el-input
-                v-if="o_item.isRequired"
+                v-if="o_item.isRequired && !disabled"
                 v-model="o_item.extraTxt"
+                :disabled="disabled"
               />
+              <div
+                v-else-if="o_item.extraTxt"
+                class="ml-4px"
+                style="text-decoration: underline;display: inline-block;"
+              >
+                {{ o_item.extraTxt }}
+              </div>
             </el-checkbox>
           </el-col>
         </el-row>
@@ -51,6 +59,10 @@ export default {
       type: String,
       default: "",
     },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
     options: {
       type: Array,
       default: () => [],
@@ -72,9 +84,9 @@ export default {
     };
   },
   watch: {
-    valueChild: {
+    value: {
       handler(newVal) {
-        this.checkboxValue = newVal.map((item) => item.value);
+        if (newVal && newVal.length > 0) { this.checkboxValue = newVal.map((item) => item.value); }
       },
       deep: true,
       immediate: true,

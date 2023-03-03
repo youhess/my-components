@@ -1,12 +1,15 @@
 <template>
   <section class="ces-table-page">
-    <!-- 表格操作按钮 -->
+    <!-- 功能区域 -->
     <section
       v-if="isHandle && tableHandles && tableHandles.length > 0"
       class="handle-wrapper"
     >
       <template>
-        <span v-for="(item, index) in tableHandles" :key="index">
+        <span
+          v-for="(item, index) in tableHandles"
+          :key="index"
+        >
           <el-button
             v-if="item.isShown ? item.isShown() : true"
             :size="item.size || size"
@@ -21,23 +24,29 @@
             :class="(item.handleclass && item.handleclass()) || item.class"
             :disabled="item.isDisabled && item.isDisabled()"
             @click="item.handle()"
-            >{{ item.label }}
+          >{{ item.label }}
           </el-button>
         </span>
       </template>
     </section>
-    <!-- 数据表格 -->
+    <!-- 表格区域 -->
     <section class="ces-table">
-      <div v-if="isFilterColumn" class="filter-column">
-        <el-popover placement="bottom" width="150" trigger="click">
+      <div
+        v-if="isFilterColumn"
+        class="filter-column"
+      >
+        <el-popover
+          placement="bottom"
+          width="150"
+          trigger="click"
+        >
           <el-checkbox-group v-model="filterColumnItems">
             <el-checkbox
               v-for="(item, index) in tableCols"
               :key="index"
               :label="item.label"
               :disabled="filterColumnDisabledArr.includes(item.label)"
-              >{{ item.label }}</el-checkbox
-            >
+            >{{ item.label }}</el-checkbox>
           </el-checkbox-group>
 
           <div slot="reference">
@@ -55,9 +64,9 @@
         ref="cesTable"
         :key="newTableKey"
         v-loading="loading"
-        style="width: 100%"
         :header-cell-style="headerCellStyle"
         :cell-style="cellStyle"
+        style="width: 100%"
         :data="tableData"
         :size="size"
         :border="isBorder"
@@ -67,6 +76,7 @@
         :expand-row-keys="expandRowKeys"
         :row-class-name="tableRowClassName"
         :cell-class-name="tableCellClassName"
+        stripe
         @cell-dblclick="tabClick"
         @select="select"
         @select-all="selectAll"
@@ -77,7 +87,7 @@
           <img
             style="width: 230px; height: 150px; margin: 50px auto"
             :src="'https://bluexiidev.obs.cn-east-3.myhuaweicloud.com:443/huawei/center/ad8fbd69e03f7e279ff4e0ce20f992432917d6725492a1a4ef2f157a348e1216.png'"
-          />
+          >
         </span>
         <!-- 选择项 -->
         <el-table-column
@@ -106,6 +116,7 @@
           :prop="item.prop"
           :label="item.label"
           :width="item.width"
+          :min-width="item.minWidth"
           :align="item.align"
           :fixed="item.fixed"
           :show-overflow-tooltip="
@@ -114,7 +125,10 @@
           :render-header="item.require ? renderHeader : null"
         >
           <!-- 自定表头 -->
-          <template v-if="item.isHeaderOptions" slot="header">
+          <template
+            v-if="item.isHeaderOptions"
+            slot="header"
+          >
             <div style="display: flex; align-items: center; gap: 6px">
               <div class="left-header-wrapper">
                 <!-- 启用 tooltip-->
@@ -142,7 +156,10 @@
           </template>
           <template slot-scope="scope">
             <!-- html -->
-            <span v-if="item.type === 'Html'" v-html="item.html(scope.row)" />
+            <span
+              v-if="item.type === 'Html'"
+              v-html="item.html(scope.row)"
+            />
             <!-- 按钮 -->
             <span v-else-if="item.type === 'Button'">
               <template>
@@ -168,16 +185,16 @@
                     style="margin-right: 10px"
                     :style="
                       (btn.handlestyle && btn.handlestyle(scope.row)) ||
-                      btn.style
+                        btn.style
                     "
                     :class="
                       (btn.handleclass && btn.handleclass(scope.row)) ||
-                      btn.class
+                        btn.class
                     "
                     @click="btn.handle(scope.row)"
-                    >{{
-                      (btn.formatter && btn.formatter(scope.row)) || btn.label
-                    }}
+                  >{{
+                    (btn.formatter && btn.formatter(scope.row)) || btn.label
+                  }}
                   </el-button>
                 </span>
                 <el-dropdown
@@ -196,24 +213,24 @@
                     :loading="item.collapseButton['loading']"
                     :disabled="
                       item.collapseButton['isDisabled'] &&
-                      item.collapseButton['isDisabled'](scope.row)
+                        item.collapseButton['isDisabled'](scope.row)
                     "
                     style="margin-right: 10px"
                     :style="
                       (item.collapseButton['handlestyle'] &&
                         item.collapseButton['handlestyle'](scope.row)) ||
-                      item.collapseButton['style']
+                        item.collapseButton['style']
                     "
                     :class="
                       (item.collapseButton['handleclass'] &&
                         item.collapseButton['handleclass'](scope.row)) ||
-                      item.collapseButton['class']
+                        item.collapseButton['class']
                     "
-                    >{{
-                      (item.collapseButton["formatter"] &&
-                        item.collapseButton["formatter"](scope.row)) ||
-                      item.collapseButton["label"]
-                    }}
+                  >{{
+                     (item.collapseButton["formatter"] &&
+                       item.collapseButton["formatter"](scope.row)) ||
+                       item.collapseButton["label"]
+                   }}
                     <i
                       v-if="item.collapseButton['suffix']"
                       :class="item.collapseButton['suffix']"
@@ -240,17 +257,17 @@
                         style="margin-right: 10px"
                         :style="
                           (btn.handlestyle && btn.handlestyle(scope.row)) ||
-                          btn.style
+                            btn.style
                         "
                         :class="
                           (btn.handleclass && btn.handleclass(scope.row)) ||
-                          btn.class
+                            btn.class
                         "
                         @click="btn.handle(scope.row)"
-                        >{{
-                          (btn.formatter && btn.formatter(scope.row)) ||
+                      >{{
+                        (btn.formatter && btn.formatter(scope.row)) ||
                           btn.label
-                        }}
+                      }}
                       </el-button>
                     </el-dropdown-item>
                   </el-dropdown-menu>
@@ -261,10 +278,51 @@
             <el-input
               v-else-if="item.type === 'Input'"
               v-model="scope.row[item.prop]"
+              :style="{ width: item.width || '100%' }"
               :size="size"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
               :readonly="item.readonly && item.readonly(scope.row)"
               @focus="item.focus && item.focus(scope.row)"
+              @input="
+                handleInput(
+                  $event,
+                  item.oninput,
+                  item.input && item.input(scope.row[item.prop]),
+                  (value)=>{scope.row[item.prop] = value}
+                )
+              "
+            />
+            <!-- 日期 -->
+            <el-date-picker
+              v-else-if="item.type === 'Date'"
+              v-model="scope.row[item.prop]"
+              :placeholder="item.placeholder"
+              :size="size"
+              type="date"
+              :style="{ width: item.width || '100%' }"
+              :picker-options="item.pickerOptions"
+              :value-format="item.valueFormat || 'yyyy-MM-dd HH:mm:ss'"
+              @change="item.change && item.change(scope.row)"
+            />
+            <!-- 日期时间 -->
+            <el-date-picker
+              v-else-if="item.type === 'DatetimePicker'"
+              v-model="scope.row[item.prop]"
+              :type="item.isRange ? 'datetimerange' : 'datetime'"
+              :prefix-icon="item.prefixIcon || 'el-icon-date'"
+              :start-placeholder="item.startPlaceholder"
+              :end-placeholder="item.endPlaceholder"
+              :placeholder="item.placeholder"
+              :size="size"
+              :disabled="
+                (item.handledisabled && item.handledisabled(scope.row)) ||
+                  item.disabled
+              "
+              :range-separator="item.rangeSeparator || '~'"
+              :value-format="item.valueFormat || 'yyyy-MM-dd HH:mm:ss'"
+              :style="{ width: item.width || '100%' }"
+              :picker-options="item.pickerOptions"
+              @change="item.change && item.change(scope.row)"
             />
             <!-- 下拉框 -->
             <el-select
@@ -272,14 +330,15 @@
               v-model="scope.row[item.prop]"
               :size="size"
               :props="item.props"
+              :style="{ width: item.width || '100%' }"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
               @change="item.change && item.change(scope.row)"
             >
               <el-option
                 v-for="op in item.options"
-                :key="op[item.props.value]"
-                :label="op[item.props.label]"
-                :value="op[item.props.value]"
+                :key="op.value"
+                :label="op.label"
+                :value="op.value"
               />
             </el-select>
             <!-- 单选 -->
@@ -293,8 +352,7 @@
                 v-for="(ra, index) in item.radios"
                 :key="index"
                 :label="ra.value"
-                >{{ ra.label }}</el-radio
-              >
+              >{{ ra.label }}</el-radio>
             </el-radio-group>
             <!-- 复选框 -->
             <el-checkbox-group
@@ -307,7 +365,7 @@
                 v-for="(ra, index) in item.checkboxs"
                 :key="index"
                 :label="ra.value"
-                >{{ ra.label }}
+              >{{ ra.label }}
               </el-checkbox>
             </el-checkbox-group>
             <!-- checkbox 单选 -->
@@ -316,7 +374,7 @@
               v-model="scope.row[item.prop]"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
               @change="item.change && item.change(scope.row)"
-              >{{ item.name }}
+            >{{ item.name }}
             </el-checkbox>
             <!-- 评价 -->
             <el-rate
@@ -394,18 +452,21 @@
                     {{
                       (item.tooltipFormatter &&
                         item.tooltipFormatter(item_array)) ||
-                      item_array
-                    }}<br />
+                        item_array
+                    }}<br>
                   </div>
                 </div>
                 <span>
                   {{
                     (item.formatter && item.formatter(scope.row)) ||
-                    scope.row[item.prop][0]
+                      scope.row[item.prop][0]
                   }}
                 </span>
               </el-tooltip>
-              <span v-else style="color: rgba(144, 147, 153, 0.8)"> 无 </span>
+              <span
+                v-else
+                style="color: rgba(144, 147, 153, 0.8)"
+              > 无 </span>
             </span>
             <!-- 双击input -->
             <span
@@ -417,7 +478,7 @@
               <div
                 v-if="
                   scope.row.index === dbClickRowIndex &&
-                  scope.column.index === dbClickCellIndex
+                    scope.column.index === dbClickCellIndex
                 "
               >
                 <el-input
@@ -427,7 +488,10 @@
                   @blur="inputBlur(scope.row)"
                 />
               </div>
-              <div v-else class="cursor-pointer">
+              <div
+                v-else
+                class="cursor-pointer"
+              >
                 {{ scope.row[item.prop] }}
               </div>
               <!-- </div> -->
@@ -442,7 +506,10 @@
               :class="item.handleclass && item.handleclass(scope.row)"
             >
               <!-- tooltip -->
-              <el-tooltip v-if="item.isTooltip" placement="top">
+              <el-tooltip
+                v-if="item.isTooltip"
+                placement="top"
+              >
                 <div slot="content">
                   <span
                     v-html="
@@ -455,15 +522,18 @@
                   <span
                     v-if="
                       (item.formatter && item.formatter(scope.row)) ||
-                      scope.row[item.prop]
+                        scope.row[item.prop]
                     "
                   >
                     {{
                       (item.formatter && item.formatter(scope.row)) ||
-                      scope.row[item.prop]
+                        scope.row[item.prop]
                     }}
                   </span>
-                  <span v-else style="color: rgba(144, 147, 153, 0.8)">
+                  <span
+                    v-else
+                    style="color: rgba(144, 147, 153, 0.8)"
+                  >
                     无
                   </span>
                 </span>
@@ -473,23 +543,38 @@
                 <span
                   v-if="
                     (item.formatter && item.formatter(scope.row)) ||
-                    scope.row[item.prop]
+                      scope.row[item.prop]
                   "
                 >
                   {{
                     (item.formatter && item.formatter(scope.row)) ||
-                    scope.row[item.prop]
+                      scope.row[item.prop]
                   }}
                 </span>
-                <span v-else style="color: rgba(144, 147, 153, 0.8)"> 无 </span>
+                <span
+                  v-else
+                  style="color: rgba(144, 147, 153, 0.8)"
+                > 无 </span>
               </span>
             </span>
+            <!-- 自定义item slot -->
+            <template v-else-if="item.type === 'Slot'">
+              <div>
+                <slot
+                  :name="item.name"
+                  :scope="scope"
+                >我是{{ item.name }}内容区域，请填写插槽值“scope”</slot>
+              </div>
+            </template>
           </template>
         </el-table-column>
       </el-table>
     </section>
-    <!-- 分页 -->
-    <section v-if="isPagination" class="ces-pagination-wrapper">
+    <!-- 分页区域 -->
+    <section
+      v-if="isPagination"
+      class="ces-pagination-wrapper"
+    >
       <el-pagination
         class="ces-pagination"
         layout="total,sizes ,prev, pager, next,jumper"
@@ -513,7 +598,7 @@ export default {
   directives: {
     focus: {
       // 指令的定义
-      inserted: function (el) {
+      inserted: function(el) {
         el.getElementsByTagName("input")[0].focus();
         // el.querySelector("input").focus();
       },
@@ -563,13 +648,16 @@ export default {
     headerCellStyle: {
       type: [Object, Function],
       default: () => ({
-        background: "#fafafa",
-        color: "#606266",
+        backgroundColor: "#f5f7fa",
+        color: "#909399",
+        height: "60px",
       }),
     },
     cellStyle: {
       type: [Object, Function],
-      default: () => {},
+      default: () => ({
+        height: "60px",
+      }),
     },
   },
   data() {
@@ -586,7 +674,7 @@ export default {
   },
   watch: {
     defaultSelections(val) {
-      this.$nextTick(function () {
+      this.$nextTick(function() {
         if (Array.isArray(val)) {
           val.forEach((row) => {
             this.$refs.cesTable.toggleRowSelection(row);
@@ -710,6 +798,15 @@ export default {
         this.$refs.cesTable.clearSelection();
       });
     },
+    // oninput 输入正则过滤
+    handleInput(value, pattern, fn, callback) {
+      if (typeof callback === "function") {
+        value = value.replace(pattern, "");
+        callback(value);
+      }
+
+      fn;
+    },
   },
 };
 </script>
@@ -723,8 +820,8 @@ export default {
   .filter-column {
     position: absolute;
     z-index: 1000;
-    right: 12px;
-    top: 12px;
+    right: 15px;
+    top: 20px;
   }
 }
 
