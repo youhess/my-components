@@ -5,7 +5,7 @@
       :title="title"
       :column="column"
       :size="size"
-      :border="border" 
+      :border="border"
       :direction="direction"
     >
       <template v-if="isExtra" slot="extra">
@@ -42,7 +42,7 @@
           <span v-else style="color: #909399"> 暂无 </span>
         </span>
         <!-- 图像 -->
-        <div v-if="item.type === 'image' || item.type === 'Image'">
+        <div v-else-if="['image', 'Image'].includes(item.type)">
           <span v-if="item.value">
             <!-- 为一张的时候 -->
             <el-image
@@ -73,16 +73,14 @@
           <span v-else style="color: #909399"> 暂无 </span>
         </div>
         <!-- 双击label input切换 -->
-        <div
-          v-if="item.type === 'dbClickInput' || item.type === 'DbClickInput'"
-        >
+        <div v-else-if="['dbClickInput', 'DbClickInput'].includes(item.type)">
           <div v-if="(item.formatter && item.formatter(item)) || item.value">
             <div v-if="dbClickInputFlag && dbClickInputName === item.name">
               <el-input
                 v-model="item.value"
                 v-focus
-                :style="{ width: item.width ? item.width : '100%' }"
-                :size="item.size ? item.size : size"
+                :style="{ width: item.width || '100%' }"
+                :size="item.size || size"
                 @blur="inputBlur(item, () => item.blur && item.blur(item))"
               />
             </div>
@@ -98,7 +96,7 @@
         </div>
         <!-- 输入框 -->
         <el-input
-          v-if="item.type == 'input' || item.type == 'Input'"
+          v-else-if="['input', 'Input'].includes(item.type)"
           v-model="item.value"
           :style="{ width: item.width ? item.width : '100%' }"
           clearable
@@ -109,7 +107,7 @@
               item.handledisabled(customForm[item.prop])) ||
             item.disabled
           "
-          :size="item.size ? item.size : size"
+          :size="item.size || size"
           :placeholder="`请输入${item.name}`"
           :show-password="item.showPassword"
           @change="item.change && item.change(customForm[item.prop])"
@@ -136,12 +134,12 @@
         </el-input>
         <!-- 下拉 -->
         <el-select
-          v-if="item.type === 'select' || item.type == 'Select'"
+          v-else-if="['select', 'Select'].includes(item.type)"
           v-model="item.value"
           v-el-select-lazyloading="item.lazyloading"
           clearable
-          :style="{ width: item.width ? item.width : '100%' }"
-          :size="item.size ? item.size : size"
+          :style="{ width: item.width || '100%' }"
+          :size="item.size || size"
           :multiple="item.multiple"
           :filterable="item.filterable"
           :reserve-keyword="item.reserveKeyword"
@@ -164,7 +162,7 @@
           />
         </el-select>
         <!-- 需要自定义情况下添加Slot -->
-        <div v-if="item.type === 'slot' || item.type === 'Slot'">
+        <div v-else-if="['slot', 'Slot'].includes(item.type)">
           <slot :name="item.name" :item="item"
             >我是{{ item.name }}内容区域,scope返回值为item</slot
           >
@@ -256,7 +254,6 @@ export default {
   },
   methods: {
     handleDbClickInput(item) {
-      console.log("hello", item);
       this.dbClickInputName = item.name;
       this.dbClickInputFlag = true;
     },

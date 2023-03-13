@@ -31,35 +31,6 @@
     </section>
     <!-- 表格区域 -->
     <section class="ces-table">
-      <div
-        v-if="isFilterColumn"
-        class="filter-column"
-      >
-        <el-popover
-          placement="bottom"
-          width="150"
-          trigger="click"
-        >
-          <el-checkbox-group v-model="filterColumnItems">
-            <el-checkbox
-              v-for="(item, index) in tableCols"
-              :key="index"
-              :label="item.label"
-              :disabled="filterColumnDisabledArr.includes(item.label)"
-            >{{ item.label }}</el-checkbox>
-          </el-checkbox-group>
-
-          <div slot="reference">
-            <!-- <i class="el-icon-s-operation"></i> -->
-            <div>
-              <svg-icon
-                style="width: 16px; height: 16px; cursor: pointer"
-                icon-class="selectList"
-              />
-            </div>
-          </div>
-        </el-popover>
-      </div>
       <el-table
         ref="cesTable"
         :key="newTableKey"
@@ -119,9 +90,7 @@
           :min-width="item.minWidth"
           :align="item.align"
           :fixed="item.fixed"
-          :show-overflow-tooltip="
-            item.notShowOverflowTooltip ? !item.notShowOverflowTooltip : true
-          "
+          :show-overflow-tooltip="!item.notShowOverflowTooltip || true"
           :render-header="item.require ? renderHeader : null"
         >
           <!-- 自定表头 -->
@@ -154,14 +123,49 @@
               </div>
             </div>
           </template>
+          <!-- 表头过滤 -->
+          <template
+            v-else-if="item.isFilterColumn"
+            slot="header"
+          >
+            <div class="filter-column">
+              <span>{{ item.label }}</span>
+              <el-popover
+                placement="bottom"
+                width="150"
+                trigger="click"
+              >
+                <el-checkbox-group v-model="filterColumnItems">
+                  <el-checkbox
+                    v-for="(item, index) in tableCols"
+                    :key="index"
+                    :label="item.label"
+                    :disabled="
+                      item.filterColumnDisabledArr &&
+                        item.filterColumnDisabledArr.includes(item.label)
+                    "
+                  >{{ item.label }}</el-checkbox>
+                </el-checkbox-group>
+                <div
+                  slot="reference"
+                  style="width: 16px; height: 16px"
+                >
+                  <svg-icon
+                    style="width: 16px; height: 16px; cursor: pointer"
+                    icon-class="selectList"
+                  />
+                </div>
+              </el-popover>
+            </div>
+          </template>
           <template slot-scope="scope">
             <!-- html -->
             <span
-              v-if="item.type === 'Html'"
+              v-if="['Html', 'html'].includes(item.type)"
               v-html="item.html(scope.row)"
             />
             <!-- 按钮 -->
-            <span v-else-if="item.type === 'Button'">
+            <span v-else-if="['Button', 'button'].includes(item.type)">
               <template>
                 <span
                   v-for="(btn, index) in item.btnList.slice(
@@ -276,7 +280,7 @@
             </span>
             <!-- 输入框 -->
             <el-input
-              v-else-if="item.type === 'Input'"
+              v-else-if="['Input', 'input'].includes(item.type)"
               v-model="scope.row[item.prop]"
               :style="{ width: item.width || '100%' }"
               :size="size"
@@ -288,13 +292,15 @@
                   $event,
                   item.oninput,
                   item.input && item.input(scope.row[item.prop]),
-                  (value)=>{scope.row[item.prop] = value}
+                  (value) => {
+                    scope.row[item.prop] = value;
+                  }
                 )
               "
             />
             <!-- 日期 -->
             <el-date-picker
-              v-else-if="item.type === 'Date'"
+              v-else-if="['Date', 'date'].includes(item.type)"
               v-model="scope.row[item.prop]"
               :placeholder="item.placeholder"
               :size="size"
@@ -306,7 +312,9 @@
             />
             <!-- 日期时间 -->
             <el-date-picker
-              v-else-if="item.type === 'DatetimePicker'"
+              v-else-if="
+                ['DatetimePicker', 'datetimePicker'].includes(item.type)
+              "
               v-model="scope.row[item.prop]"
               :type="item.isRange ? 'datetimerange' : 'datetime'"
               :prefix-icon="item.prefixIcon || 'el-icon-date'"
@@ -326,7 +334,7 @@
             />
             <!-- 下拉框 -->
             <el-select
-              v-else-if="item.type === 'Select'"
+              v-else-if="['Select', 'select'].includes(item.type)"
               v-model="scope.row[item.prop]"
               :size="size"
               :props="item.props"
@@ -343,7 +351,7 @@
             </el-select>
             <!-- 单选 -->
             <el-radio-group
-              v-else-if="item.type === 'Radio'"
+              v-else-if="['Radio', 'radio'].includes(item.type)"
               v-model="scope.row[item.prop]"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
               @change="item.change && item.change(scope.row)"
@@ -356,7 +364,7 @@
             </el-radio-group>
             <!-- 复选框 -->
             <el-checkbox-group
-              v-else-if="item.type === 'CheckboxGroup'"
+              v-else-if="['CheckboxGroup', 'checkboxGroup'].includes(item.type)"
               v-model="scope.row[item.prop]"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
               @change="item.change && item.change(scope.row)"
@@ -370,7 +378,7 @@
             </el-checkbox-group>
             <!-- checkbox 单选 -->
             <el-checkbox
-              v-else-if="item.type === 'CheckBox'"
+              v-else-if="['CheckBox', 'checkBox'].includes(item.type)"
               v-model="scope.row[item.prop]"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
               @change="item.change && item.change(scope.row)"
@@ -378,14 +386,14 @@
             </el-checkbox>
             <!-- 评价 -->
             <el-rate
-              v-else-if="item.type === 'Rate'"
+              v-else-if="['Rate', 'rate'].includes(item.type)"
               v-model="scope.row[item.prop]"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
               @change="item.change && item.change(scope.row)"
             />
             <!-- 开关 -->
             <el-switch
-              v-else-if="item.type === 'Switch'"
+              v-else-if="['Switch', 'switch'].includes(item.type)"
               v-model="scope.row[item.prop]"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
               :active-value="item.activeValue"
@@ -393,7 +401,7 @@
               @change="item.change && item.change(scope.row)"
             />
             <!-- 图像 -->
-            <div v-else-if="item.type === 'Image'">
+            <div v-else-if="['Image', 'image'].includes(item.type)">
               <!-- <img
                 :src="scope.row[item.prop]"
                 @click="item.handle && item.handle(scope.row)"
@@ -423,20 +431,20 @@
             </div>
             <!-- 滑块 -->
             <el-slider
-              v-else-if="item.type === 'Slider'"
+              v-else-if="['Slider', 'slider'].includes(item.type)"
               v-model="scope.row[item.prop]"
               :disabled="item.isDisabled && item.isDisabled(scope.row)"
               @change="item.change && item.change(scope.row)"
             />
             <!-- BxTag -->
             <BxTag
-              v-else-if="item.type === 'BxTag'"
+              v-else-if="['BxTag', 'bxTag'].includes(item.type)"
               :status="item.status && item.status(scope.row)"
               :txt="item.txt && item.txt(scope.row)"
             />
             <!-- Array -->
             <span
-              v-else-if="item.type === 'Array'"
+              v-else-if="['Array', 'array'].includes(item.type)"
               :style="item.handlestyle && item.handlestyle(scope.row)"
               :class="item.handleclass && item.handleclass(scope.row)"
             >
@@ -470,7 +478,7 @@
             </span>
             <!-- 双击input -->
             <span
-              v-else-if="item.type === 'dbClickInput'"
+              v-else-if="['dbClickInput', 'DbClickInput'].includes(item.type)"
               :style="item.handlestyle && item.handlestyle(scope.row)"
               :class="item.handleclass && item.handleclass(scope.row)"
             >
@@ -558,7 +566,7 @@
               </span>
             </span>
             <!-- 自定义item slot -->
-            <template v-else-if="item.type === 'Slot'">
+            <template v-else-if="['Slot', 'slot'].includes(item.type)">
               <div>
                 <slot
                   :name="item.name"
@@ -629,8 +637,6 @@ export default {
     tableCols: { type: Array, default: () => [] },
     // 是否显示表格复选框
     isSelection: { type: Boolean, default: false },
-    isFilterColumn: { type: Boolean, default: false },
-    filterColumnDisabledArr: { type: Array, default: () => [] },
     filterColumnItemArr: { type: Array, default: () => [] },
     // 储备
     reserveSection: { type: Boolean, default: false },
@@ -691,7 +697,6 @@ export default {
       this.newTableKey = this.newTableKey + 1; // 为了保证table 每次都会重渲 In order to ensure the table will be re-rendered each time
     },
     tableKey(newVal) {
-      console.log("newVal", newVal);
       this.newTableKey = newVal;
     },
     newPagination: {
@@ -788,13 +793,11 @@ export default {
       // 监听事件
       this.$on("toggleRowSelection", (res) => {
         // console.log("方法1:触发监听事件监听成功");
-        // console.log("res", res);
         this.$refs.cesTable.toggleRowSelection(res.row, res.isSelected);
       });
       // 监听事件
       this.$on("clearSelection", () => {
         // console.log("方法1:触发监听事件监听成功");
-        // console.log("res", res);
         this.$refs.cesTable.clearSelection();
       });
     },
@@ -814,15 +817,6 @@ export default {
 .ces-table-require::before {
   content: "*";
   color: red;
-}
-.ces-table {
-  position: relative;
-  .filter-column {
-    position: absolute;
-    z-index: 1000;
-    right: 15px;
-    top: 20px;
-  }
 }
 
 // .el-pagination {
@@ -850,5 +844,13 @@ export default {
     margin-right: 10px;
     margin-top: 5px;
   }
+}
+
+.filter-column {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-right: 16px;
 }
 </style>

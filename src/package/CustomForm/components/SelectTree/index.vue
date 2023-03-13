@@ -45,7 +45,6 @@ export default {
   directives: {
     "click-outside": {
       bind(el, binding) {
-        console.log("bind");
         function eventHandler(e) {
           if (el.contains(e.target)) {
             return false;
@@ -61,7 +60,6 @@ export default {
         document.addEventListener("click", eventHandler);
       },
       unbind(el) {
-        console.log("unbind");
         // 移除事件监听
         document.removeEventListener("click", el.__click_outside__);
         // 删除无用属性
@@ -149,7 +147,6 @@ export default {
   },
   methods: {
     completeParam() {
-      console.log("this.value", this.value);
       const isCurrentDataExist =
         this.setCurrentData() && this.setCurrentData().length > 0;
       if (isCurrentDataExist) {

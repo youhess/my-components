@@ -18,22 +18,15 @@
     >
       <i class="el-icon-plus" />
     </el-upload>
-    <el-dialog
-      :visible.sync="dialogVisible"
-      append-to-body
-    >
-      <img
-        width="100%"
-        :src="dialogImageUrl"
-        alt=""
-      >
+    <el-dialog :visible.sync="dialogVisible" append-to-body>
+      <img width="100%" :src="dialogImageUrl" alt="" />
     </el-dialog>
   </div>
 </template>
 
 <script>
 import axios from "axios";
-import CryptoJS from 'crypto-js'
+import CryptoJS from "crypto-js";
 
 export default {
   name: "UploadImages",
@@ -60,7 +53,7 @@ export default {
     },
     handleUpload: {
       type: Function,
-      default: function(data) {
+      default: function (data) {
         return axios({
           method: "post",
           url: "./api/v1/file/upload/generate",
@@ -83,7 +76,7 @@ export default {
   watch: {
     // 赋值
     value: {
-      handler: function(newValue) {
+      handler: function (newValue) {
         if (this.limit === 1) {
           // newValue 类型字符串 or undefined
           if (typeof newValue === "undefined") {
@@ -101,8 +94,8 @@ export default {
             this.banner_list = !newValue
               ? []
               : newValue.map((url) => {
-                return { url: url };
-              });
+                  return { url: url };
+                });
           }
         }
         this.fileList = JSON.parse(JSON.stringify(this.banner_list));
@@ -123,9 +116,9 @@ export default {
       return true;
     },
     sha256File(file) {
-      return new Promise(function(resolve) {
+      return new Promise(function (resolve) {
         const reader = new FileReader();
-        reader.onload = function(event) {
+        reader.onload = function (event) {
           const data = event.target.result;
           const encrypted = CryptoJS.SHA256(data);
           resolve(CryptoJS.enc.Hex.stringify(encrypted));
@@ -148,15 +141,14 @@ export default {
             method: "PUT",
             url: initRes.data.uploadUrl,
             withCredentials: false,
-            headers: initRes.headers,
-            validateStatus: function(status) {
+            headers: initRes.data.headers,
+            validateStatus: function (status) {
               return status >= 200;
             },
             maxRedirects: 0,
             responseType: "text",
             data: file,
           });
-          console.log("secondRes", secondRes);
           if (secondRes.status < 300) {
             return initRes;
           } else {
@@ -208,7 +200,6 @@ export default {
     },
     // 改变
     handleEditChange(file, fileList) {
-      console.log("fileList ", fileList);
       this.hideUploadBtn = fileList.length >= this.limit;
     },
     // 删除

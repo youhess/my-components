@@ -15,24 +15,22 @@
       >
         <!-- 输入框 -->
         <el-input
-          v-if="item.type === 'Input'"
+          v-if="['Input', 'input'].includes(item.type)"
           v-model="sonSearchData[item.prop]"
           :style="{ width: item.width }"
-          :size="itemSize ? itemSize : item.size"
+          :size="itemSize || item.size"
           :placeholder="item.placeholder"
           :clearable="clearable"
+          @input="item.input && item.input(sonSearchData[item.prop])"
           @change="item.change && item.change(sonSearchData[item.prop])"
         >
-          <i
-            slot="suffix"
-            class="el-input__icon el-icon-search"
-          />
+          <i slot="suffix" class="el-input__icon el-icon-search" />
         </el-input>
         <!-- 下拉框 -->
         <el-select
-          v-if="item.type === 'Select'"
+          v-else-if="['Select', 'select'].includes(item.type)"
           v-model="sonSearchData[item.prop]"
-          :size="itemSize ? itemSize : item.size"
+          :size="item.size || size"
           :style="{ width: item.width }"
           :placeholder="item.placeholder"
           :filterable="item.filterable"
@@ -54,9 +52,9 @@
         </el-select>
         <!-- 单选 -->
         <el-radio-group
-          v-if="item.type === 'Radio'"
+          v-else-if="['Radio', 'radio'].includes(item.type)"
           v-model="sonSearchData[item.prop]"
-          :size="itemSize ? itemSize : item.size"
+          :size="item.size || size"
           :style="{ width: item.width }"
           @change="item.change && item.change(sonSearchData[item.prop])"
         >
@@ -64,13 +62,14 @@
             v-for="ra in item.radios"
             :key="ra.value"
             :label="ra.value"
-          >{{ ra.label }}</el-radio>
+            >{{ ra.label }}</el-radio
+          >
         </el-radio-group>
         <!-- 单选按钮 -->
         <el-radio-group
-          v-if="item.type === 'RadioButton'"
+          v-else-if="['RadioButton', 'radioButton'].includes(item.type)"
           v-model="sonSearchData[item.prop]"
-          :size="itemSize ? itemSize : item.size"
+          :size="item.size || size"
           :style="{ width: item.width }"
           @change="item.change && item.change(sonSearchData[item.prop])"
         >
@@ -78,13 +77,14 @@
             v-for="ra in item.radios"
             :key="ra.value"
             :label="ra.value"
-          >{{ ra.label }}</el-radio-button>
+            >{{ ra.label }}</el-radio-button
+          >
         </el-radio-group>
         <!-- 复选框 -->
         <el-checkbox-group
-          v-if="item.type === 'Checkbox'"
+          v-else-if="['Checkbox', 'checkbox'].includes(item.type)"
           v-model="sonSearchData[item.prop]"
-          :size="itemSize ? itemSize : item.size"
+          :size="item.size || size"
           :clearable="clearable"
           :style="{ width: item.width }"
           @change="item.change && item.change(sonSearchData[item.prop])"
@@ -93,99 +93,99 @@
             v-for="ch in item.checkboxs"
             :key="ch.value"
             :label="ch.value"
-          >{{ ch.label }}</el-checkbox>
+            >{{ ch.label }}</el-checkbox
+          >
         </el-checkbox-group>
         <!-- 日期 -->
         <el-date-picker
-          v-if="item.type === 'Date'"
+          v-else-if="['Date', 'date'].includes(item.type)"
           v-model="sonSearchData[item.prop]"
           :placeholder="item.placeholder"
-          :size="itemSize ? itemSize : item.size"
+          :size="item.size || size"
           type="date"
           :style="{ width: item.width }"
           :picker-options="item.pickerOptions"
-          :value-format="item.valueFormat? item.valueFormat : 'yyyy-MM-dd HH:mm:ss'"
+          :value-format="item.valueFormat || 'yyyy-MM-dd HH:mm:ss'"
           @change="item.change && item.change(sonSearchData[item.prop])"
         />
         <!-- 时间 -->
         <el-time-picker
-          v-if="item.type === 'Time'"
+          v-else-if="['Time', 'time'].includes(item.type)"
           v-model="sonSearchData[item.prop]"
-          :size="itemSize ? itemSize : item.size"
+          :size="item.size || size"
           :picker-options="item.pickerOptions"
           :placeholder="item.placeholder"
           :style="{ width: item.width }"
-          :value-format="item.valueFormat? item.valueFormat : 'yyyy-MM-dd HH:mm:ss'"
+          :value-format="item.valueFormat || 'yyyy-MM-dd HH:mm:ss'"
           @change="item.change && item.change(sonSearchData[item.prop])"
         />
         <!-- 日期时间 -->
         <el-date-picker
-          v-if="item.type === 'DateTime'"
+          v-else-if="['DateTime', 'dateTime'].includes(item.type)"
           v-model="sonSearchData[item.prop]"
           type="datetime"
           :placeholder="item.placeholder"
           :disabled="item.disable && item.disable(sonSearchData[item.prop])"
-          :value-format="item.valueFormat? item.valueFormat : 'yyyy-MM-dd HH:mm:ss'"
+          :value-format="item.valueFormat || 'yyyy-MM-dd HH:mm:ss'"
           :picker-options="item.pickerOptions"
-          :size="itemSize ? itemSize : item.size"
+          :size="item.size || size"
           :style="{ width: item.width }"
           @change="item.change && item.change(sonSearchData[item.prop])"
         />
         <!-- 日期范围 -->
         <el-date-picker
-          v-if="item.type === 'Datetimerange'"
+          v-else-if="['Datetimerange', 'datetimerange'].includes(item.type)"
           v-model="sonSearchData[item.prop]"
           type="datetimerange"
           range-separator="~"
-          
           :start-placeholder="item.startPlaceholder"
           :end-placeholder="item.endPlaceholder"
-          :value-format="item.valueFormat? item.valueFormat : 'yyyy-MM-dd HH:mm:ss'"
+          :value-format="item.valueFormat || 'yyyy-MM-dd HH:mm:ss'"
           :picker-options="item.pickerOptions"
-          :size="itemSize ? itemSize : item.size"
+          :size="item.size || size"
           @change="item.change && item.change(sonSearchData[item.prop])"
         />
         <!-- 其他日期单位 -->
         <!-- month -->
         <el-date-picker
-          v-if="item.type === 'Month'"
+          v-else-if="['Month', 'month'].includes(item.type)"
           v-model="sonSearchData[item.prop]"
           type="month"
           :placeholder="item.placeholder"
           :disabled="item.disable && item.disable(sonSearchData[item.prop])"
           :picker-options="item.pickerOptions"
-          :value-format="item.valueFormat? item.valueFormat : 'yyyy-MM-dd HH:mm:ss'"
-          :size="itemSize ? itemSize : item.size"
+          :value-format="item.valueFormat || 'yyyy-MM-dd HH:mm:ss'"
+          :size="item.size || size"
           :style="{ width: item.width }"
           @change="item.change && item.change(sonSearchData[item.prop])"
         />
         <!-- 滑块 -->
         <el-slider
-          v-if="item.type === 'Slider'"
+          v-else-if="['Slider', 'slider'].includes(item.type)"
           v-model="sonSearchData[item.prop]"
-          :size="itemSize ? itemSize : item.size"
+          :size="item.size || size"
           :style="{ width: item.width }"
           @change="item.change && item.change(sonSearchData[item.prop])"
         />
         <!-- 开关 -->
         <div
-          v-if="item.type === 'Switch'"
+          v-else-if="['Switch', 'switch'].includes(item.type)"
           :style="{ width: item.width }"
         >
           <el-switch
             v-model="sonSearchData[item.prop]"
-            :size="itemSize ? itemSize : item.size"
+            :size="item.size || size"
             :active-value="item.activeValue"
             :inactive-value="item.inactiveValue"
             @change="item.change && item.change(sonSearchData[item.prop])"
           />
         </div>
         <!-- 自定义item slot -->
-        <template v-if="item.type === 'Slot'">
+        <template v-else-if="['Slot', 'slot'].includes(item.type)">
           <div>
-            <slot
-              :name="item.prop"
-            >我是{{ item.prop }}内容区域，请填写自定义item</slot>
+            <slot :name="item.prop"
+              >我是{{ item.prop }}内容区域，请填写自定义item</slot
+            >
           </div>
         </template>
       </el-form-item>
@@ -197,11 +197,14 @@
           class="form-item"
         >
           <el-button
-            v-if="item.isPermitted ? item.isPermitted() : true"
+            v-if="item.isShown ? item.isShown() : true"
             :type="item.type"
-            :size="itemSize ? itemSize : item.size || formSize"
+            :size="itemSize || item.size || formSize"
+            :style="(item.handlestyle && item.handlestyle()) || item.style"
+            :class="(item.handleclass && item.handleclass()) || item.class"
             @click="item.handle()"
-          >{{ item.label }}</el-button>
+            >{{ item.label }}</el-button
+          >
         </el-form-item>
       </template>
     </el-form>
@@ -261,7 +264,7 @@ export default {
   watch: {
     sonSearchData: {
       // 这里箭头函数指向可能会出现问题
-      handler: function(newVal) {
+      handler: function (newVal) {
         this.$emit("searchDataChange", newVal);
       },
       deep: true,
@@ -275,7 +278,7 @@ export default {
   display: flex;
   align-items: center;
   ::v-deep .form {
-   .form-item {
+    .form-item {
       // .el-form-item__label {
       //   width: 80px !important;
       // }
@@ -283,7 +286,7 @@ export default {
     }
   }
 }
-::v-deep  .el-form-item{
+::v-deep .el-form-item {
   margin-bottom: 16px;
 }
 </style>

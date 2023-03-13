@@ -34,7 +34,9 @@
             v-model="scope.row[item.prop]"
             :size="size"
             :maxlength="10"
-            :disabled="item.isDisabled && item.isDisabled(scope.row)||disabled"
+            :disabled="
+              (item.isDisabled && item.isDisabled(scope.row)) || disabled
+            "
           />
         </template>
       </el-table-column>
@@ -102,7 +104,7 @@ export default {
       type: Array,
       default: () => [],
     },
-    width: { type: String, default: "" }
+    width: { type: String, default: "" },
   },
   data() {
     return {
@@ -113,7 +115,7 @@ export default {
   watch: {
     value: {
       handler(newVal) {
-        this.tableData = newVal
+        this.tableData = newVal;
       },
       deep: true,
       immediate: true,
@@ -130,21 +132,28 @@ export default {
       deep: true,
       immediate: true,
     },
-    autoRowItem: {
+    tableData: {
       handler(newVal) {
         // not defined seem as minimum 1
         if (!this.lengthMin) {
-          this.tableData.push(JSON.parse(JSON.stringify(newVal)));
+          for (const key in this.autoRowItem) {
+            this.$set(newVal[0], key, newVal[0][key] || this.autoRowItem[key]);
+          }
         }
         // regular
         else {
           for (let i = 0; i < this.lengthMin; i++) {
-            this.tableData.push(JSON.parse(JSON.stringify(newVal)));
+            for (const key in this.autoRowItem) {
+              this.$set(
+                newVal[i],
+                key,
+                newVal[i][key] || this.autoRowItem[key]
+              );
+            }
           }
         }
       },
       deep: true,
-      immediate: true,
     },
   },
   methods: {
